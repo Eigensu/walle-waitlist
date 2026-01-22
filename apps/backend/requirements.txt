@@ -213,8 +213,6 @@ pydub==0.25.1
 Pygments==2.19.2
 PyJWT==2.10.1
 pymongo==4.9.1
-PyMuPDF==1.23.6
-PyMuPDFb==1.23.6
 pyparsing==3.2.3
 pypdf==3.16.2
 pypdfium2==4.30.0
