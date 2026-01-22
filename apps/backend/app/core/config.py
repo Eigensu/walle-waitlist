@@ -9,10 +9,9 @@ from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-# Locate the nearest .env walking upward; fall back to ./env at runtime.
-ROOT_ENV_PATH = next(
-	(p / ".env") for p in Path(__file__).resolve().parents if (p / ".env").exists()
-)
+# Locate the nearest .env walking upward; fall back to CWD/.env
+_env_candidates = [p / ".env" for p in Path(__file__).resolve().parents]
+ROOT_ENV_PATH = next((p for p in _env_candidates if p.exists()), Path(".env"))
 load_dotenv(ROOT_ENV_PATH, override=False)
 
 
