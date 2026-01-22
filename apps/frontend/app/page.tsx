@@ -6,14 +6,16 @@ export default function Home() {
       <main className="flex w-full max-w-5xl flex-col gap-12 px-6 py-16 sm:px-12">
         <div className="flex flex-col items-center gap-6 text-center">
           <div className="flex flex-col items-center gap-4">
-            <Image
-              src="/walle-logo.png"
-              alt="Walle Arena Logo"
-              width={120}
-              height={120}
-              className="drop-shadow-lg"
-              priority
-            />
+            <div className="rounded-3xl bg-gradient-to-br from-blue-600 to-indigo-600 p-6 shadow-2xl">
+              <Image
+                src="/walle-logo.png"
+                alt="Walle Arena Logo"
+                width={100}
+                height={100}
+                className="h-24 w-24 object-contain brightness-0 invert"
+                priority
+              />
+            </div>
             <div className="flex flex-col gap-2">
               <h1 className="text-4xl font-bold tracking-tight text-blue-900 sm:text-5xl">
                 WALLE ARENA

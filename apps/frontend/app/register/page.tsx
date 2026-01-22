@@ -21,13 +21,13 @@ export default function RegisterPage() {
 
       <div className="relative mx-auto flex max-w-5xl flex-col gap-8 px-4 py-10 sm:px-8 lg:px-10">
         <header className="flex flex-col items-center gap-4 text-center">
-          <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-xl shadow-blue-300/60 ring-4 ring-blue-100 dark:bg-slate-800 dark:shadow-blue-900/60 dark:ring-blue-900/40">
+          <div className="relative flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 shadow-xl shadow-blue-300/60 ring-4 ring-blue-100 dark:from-blue-700 dark:to-indigo-700 dark:shadow-none dark:ring-blue-900/40">
             <Image
               src="/walle-logo.png"
               alt="Walle Arena"
-              width={56}
-              height={56}
-              className="drop-shadow-[0_15px_35px_rgba(59,130,246,0.35)] dark:drop-shadow-[0_15px_35px_rgba(59,130,246,0.2)]"
+              width={48}
+              height={48}
+              className="relative z-10 object-contain brightness-0 invert"
               priority
             />
           </div>
@@ -41,7 +41,7 @@ export default function RegisterPage() {
           </div>
         </header>
 
-        <Card className="border border-slate-200 bg-white/95 shadow-2xl shadow-blue-100/60 backdrop-blur dark:border-slate-700 dark:bg-slate-800/90 dark:shadow-blue-900/20">
+        <Card className="border border-slate-200 bg-white/95 shadow-2xl shadow-blue-100/60 backdrop-blur dark:border-slate-700 dark:bg-slate-800/90 dark:shadow-none">
           <CardContent className="p-6 sm:p-8 lg:p-10">
             <RegistrationForm />
             <p className="mt-10 text-center text-xs text-slate-500 dark:text-slate-400">

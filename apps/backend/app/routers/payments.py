@@ -115,3 +115,71 @@ async def verify_payment(
         await player.save()
 
     return VerifyPaymentResponse(status="CAPTURED", message="Payment verified")
+
+
+@router.post("/webhook")
+async def razorpay_webhook(
+    request: Request,
+    settings: Settings = Depends(get_settings),
+    razorpay: RazorpayService = Depends(get_razorpay),
+):
+    """Handle Razorpay webhook events."""
+    if not settings.razorpay_webhook_secret:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Webhook secret not configured"
+        )
+
+    # Get signature and body
+    signature = request.headers.get("X-Razorpay-Signature")
+    if not signature:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Missing signature header"
+        )
+
+    body_bytes = await request.body()
+
+    # Verify signature
+    is_valid = razorpay.verify_webhook_signature(
+        body=body_bytes,
+        signature=signature,
+        webhook_secret=settings.razorpay_webhook_secret
+    )
+
+    if not is_valid:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid webhook signature"
+        )
+
+    # Parse event
+    payload = await request.json()
+    event_type = payload.get("event")
+
+    # Handle payment.captured event
+    if event_type == "payment.captured":
+        payment_entity = payload.get("payload", {}).get("payment", {}).get("entity", {})
+        order_id = payment_entity.get("order_id")
+        payment_id = payment_entity.get("id")
+
+        if not order_id or not payment_id:
+            return {"status": "ignored", "reason": "missing order_id or payment_id"}
+
+        # Find payment by order ID
+        payment = await Payment.find_one(Payment.razorpay_order_id == order_id)
+        if not payment:
+            return {"status": "ignored", "reason": "payment record not found"}
+
+        # Update payment status
+        payment.status = PaymentStatus.CAPTURED
+        payment.razorpay_payment_id = payment_id
+        await payment.save()
+
+        # Update player status
+        player = await Player.get(payment.player_id)
+        if player:
+            player.registration_status = RegistrationStatus.PAID
+            await player.save()
+
+    return {"status": "ok"}

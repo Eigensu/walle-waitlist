@@ -30,5 +30,10 @@ class RazorpayService:
         generated = hmac.new(self.key_secret.encode(), body.encode(), hashlib.sha256).hexdigest()
         return hmac.compare_digest(generated, signature)
 
+    def verify_webhook_signature(self, body: bytes, signature: str, webhook_secret: str) -> bool:
+        """Verify Razorpay webhook signature."""
+        generated = hmac.new(webhook_secret.encode(), body, hashlib.sha256).hexdigest()
+        return hmac.compare_digest(generated, signature)
+
     async def aclose(self) -> None:
         await self._client.aclose()
