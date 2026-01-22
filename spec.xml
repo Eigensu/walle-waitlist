@@ -1,0 +1,614 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<techSpec
+  name="Walle Registration"
+  version="1.0"
+  date="2026-01-21"
+  status="refined"
+  xmlns="https://walle.example/spec"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="https://walle.example/spec techspec.xsd"
+>
+  <overview>
+    <purpose>
+      Build a two-step registration + payment flow for Walle using Next.js 15 (App Router) and FastAPI (0.115+),
+      with MongoDB (7+) via Beanie ODM, frontend Zod validation, and backend Pydantic v2 validation.
+    </purpose>
+    <goals>
+      <goal id="G1">Multi-step registration UI with file uploads (photo + visiting card)</goal>
+      <goal id="G2">Reliable payment workflow (order creation, client checkout, server verification, webhook reconciliation)</goal>
+      <goal id="G3">Clean monorepo structure with Docker-based local dev</goal>
+      <goal id="G4">Strong validation and auditability (unique email/phone, payment status tracking)</goal>
+    </goals>
+    <nonGoals>
+      <item>Admin dashboard features (analytics, exports, bulk operations)</item>
+      <item>Multi-tenant support</item>
+      <item>Complex role-based auth (optional future scope)</item>
+    </nonGoals>
+  </overview>
+
+  <stack>
+    <frontend>
+      <framework name="Next.js" version="15+">
+        <features>
+          <feature>App Router (src/app)</feature>
+          <feature>Client Components for interactive form</feature>
+          <feature>Optional Server Actions (not required for multipart upload)</feature>
+        </features>
+      </framework>
+      <styling name="Tailwind CSS" version="4.0-or-3.4.x">
+        <notes>Use Tailwind v4 if starting fresh; v3.4.x acceptable for compatibility.</notes>
+      </styling>
+      <ui name="shadcn/ui">
+        <notes>Use for Input, Button, Card, Form, Dialog/Modal, Progress/Stepper styling.</notes>
+      </ui>
+      <validation name="Zod">
+        <notes>Schema mirrors backend PlayerCreate constraints; includes file constraints on client.</notes>
+      </validation>
+      <forms name="react-hook-form">
+        <notes>Used with zodResolver; multi-step state preserved across steps.</notes>
+      </forms>
+    </frontend>
+
+    <backend>
+      <framework name="FastAPI" version="0.115+">
+        <features>
+          <feature>Lifespan context manager (database init)</feature>
+          <feature>Annotated dependencies (clean DI)</feature>
+          <feature>Async endpoints</feature>
+        </features>
+      </framework>
+      <validation name="Pydantic" version="2.x">
+        <notes>Use ConfigDict, model validators, strict whitespace trimming.</notes>
+      </validation>
+      <database name="MongoDB" version="7.0+">
+        <driver name="Motor" />
+        <odm name="Beanie" />
+      </database>
+      <storage>
+        <provider name="AWS S3" optional="true">
+          <notes>Preferred for production. Local disk storage allowed in dev.</notes>
+        </provider>
+      </storage>
+      <payments>
+        <provider name="Razorpay">
+          <notes>Order-based flow with server-side signature verification and webhook reconciliation.</notes>
+        </provider>
+      </payments>
+    </backend>
+  </stack>
+
+  <repositoryStructure>
+    <root>/walle-registration</root>
+    <tree>
+      <node path="/backend">
+        <node path="/backend/app">
+          <node path="/backend/app/core">
+            <file path="config.py" />
+            <file path="security.py" />
+          </node>
+          <node path="/backend/app/models">
+            <file path="player.py" />
+            <file path="payment.py" />
+          </node>
+          <node path="/backend/app/routers">
+            <file path="registration.py" />
+            <file path="payments.py" />
+          </node>
+          <node path="/backend/app/services">
+            <file path="storage.py" />
+            <file path="razorpay.py" />
+          </node>
+          <file path="/backend/app/main.py" />
+        </node>
+        <file path="/backend/requirements.txt" />
+      </node>
+      <node path="/frontend">
+        <node path="/frontend/src">
+          <node path="/frontend/src/app">
+            <node path="/frontend/src/app/register">
+              <file path="page.tsx" />
+            </node>
+            <file path="layout.tsx" />
+          </node>
+          <node path="/frontend/src/components">
+            <file path="registration-form.tsx" />
+            <file path="stepper.tsx" />
+            <file path="file-upload.tsx" />
+            <file path="payment-modal.tsx" />
+          </node>
+          <node path="/frontend/src/lib">
+            <file path="api.ts" />
+            <file path="validators.ts" />
+          </node>
+        </node>
+        <file path="/frontend/next.config.mjs" />
+        <file path="/frontend/package.json" />
+      </node>
+    </tree>
+  </repositoryStructure>
+
+  <configuration>
+    <environmentVariables>
+      <backend>
+        <var name="MONGO_URL" required="true" example="mongodb://mongo:27017" />
+        <var name="MONGO_DB" required="true" example="jypl_db" />
+        <var name="CORS_ORIGINS" required="false" example="http://localhost:3000" />
+        <var name="RAZORPAY_KEY_ID" required="true" />
+        <var name="RAZORPAY_KEY_SECRET" required="true" />
+        <var name="RAZORPAY_WEBHOOK_SECRET" required="false" />
+        <var name="REGISTRATION_FEE_INR" required="false" example="12500" />
+        <var name="STORAGE_MODE" required="false" example="local|s3" />
+        <var name="S3_BUCKET" required="false" />
+        <var name="S3_REGION" required="false" />
+        <var name="S3_ACCESS_KEY_ID" required="false" />
+        <var name="S3_SECRET_ACCESS_KEY" required="false" />
+      </backend>
+      <frontend>
+        <var name="NEXT_PUBLIC_APP_NAME" required="false" example="Walle Registration" />
+        <var name="NEXT_PUBLIC_RAZORPAY_KEY_ID" required="true" />
+      </frontend>
+    </environmentVariables>
+
+    <nextRewrites>
+      <rule>
+        <source>/api/:path*</source>
+        <destination>http://127.0.0.1:8000/api/:path*</destination>
+        <notes>Dev proxy to avoid CORS and keep client calls relative (/api/...)</notes>
+      </rule>
+    </nextRewrites>
+  </configuration>
+
+  <dataModel>
+    <entities>
+      <entity name="Player">
+        <storage collection="players" />
+        <fields>
+          <field name="id" type="ObjectId" generated="true" />
+          <field name="first_name" type="string" minLength="2" />
+          <field name="last_name" type="string" minLength="2" />
+          <field name="email" type="email" unique="true" />
+          <field name="phone" type="string" unique="true" pattern="^\+?[1-9]\d{1,14}$" />
+          <field name="residential_area" type="string" />
+          <field name="firm_name" type="string" />
+          <field name="designation" type="string" />
+          <field name="photo_url" type="string" />
+          <field name="visiting_card_url" type="string" />
+          <field name="registration_status" type="enum" default="PENDING_PAYMENT">
+            <enumValues>
+              <value>PENDING_PAYMENT</value>
+              <value>PAID</value>
+              <value>FAILED</value>
+            </enumValues>
+          </field>
+          <field name="created_at" type="datetime" timezone="UTC" />
+        </fields>
+        <indexes>
+          <index field="email" unique="true" />
+          <index field="phone" unique="true" />
+          <index field="created_at" />
+        </indexes>
+      </entity>
+
+      <entity name="Payment">
+        <storage collection="payments" />
+        <fields>
+          <field name="id" type="ObjectId" generated="true" />
+          <field name="player_id" type="ObjectId" required="true" />
+          <field name="razorpay_order_id" type="string" required="true" />
+          <field name="razorpay_payment_id" type="string" required="false" />
+          <field name="razorpay_signature" type="string" required="false" />
+          <field name="status" type="enum" default="CREATED">
+            <enumValues>
+              <value>CREATED</value>
+              <value>CAPTURED</value>
+              <value>FAILED</value>
+            </enumValues>
+          </field>
+          <field name="amount" type="int" required="true" />
+          <field name="currency" type="string" default="INR" />
+          <field name="created_at" type="datetime" timezone="UTC" />
+        </fields>
+        <indexes>
+          <index field="player_id" />
+          <index field="razorpay_order_id" unique="true" />
+          <index field="status" />
+          <index field="created_at" />
+        </indexes>
+      </entity>
+    </entities>
+
+    <validationRules>
+      <backend>
+        <rule id="B1">Trim whitespace for all string inputs (Pydantic ConfigDict str_strip_whitespace)</rule>
+        <rule id="B2">Reject duplicate email/phone at insert (unique index + graceful error message)</rule>
+        <rule id="B3">Store timestamps in UTC</rule>
+      </backend>
+      <frontend>
+        <rule id="F1">Zod schema mirrors PlayerCreate constraints</rule>
+        <rule id="F2">File constraints: allowlist MIME and size before submit</rule>
+      </frontend>
+    </validationRules>
+  </dataModel>
+
+  <api>
+    <basePath>/api</basePath>
+    <contentTypes>
+      <type>application/json</type>
+      <type>multipart/form-data</type>
+    </contentTypes>
+
+    <endpoints>
+      <endpoint id="E1" method="POST" path="/register">
+        <summary>Register player details and upload photo + visiting card</summary>
+        <request>
+          <contentType>multipart/form-data</contentType>
+          <fields>
+            <field name="first_name" type="string" required="true" />
+            <field name="last_name" type="string" required="true" />
+            <field name="email" type="string" format="email" required="true" />
+            <field name="phone" type="string" required="true" />
+            <field name="residential_area" type="string" required="true" />
+            <field name="firm_name" type="string" required="true" />
+            <field name="designation" type="string" required="true" />
+            <field name="photo" type="file" required="true" accept="image/*" />
+            <field name="visiting_card" type="file" required="true" accept="image/*,application/pdf" />
+          </fields>
+          <fileValidation>
+            <maxSizeBytes>5242880</maxSizeBytes>
+            <allowedMimeTypes>
+              <mime>image/jpeg</mime>
+              <mime>image/png</mime>
+              <mime>application/pdf</mime>
+            </allowedMimeTypes>
+          </fileValidation>
+        </request>
+        <response>
+          <status code="200">
+            <body schema="RegisterResponse">
+              <field name="player_id" type="string" />
+              <field name="message" type="string" example="Details Saved" />
+            </body>
+          </status>
+          <status code="409">
+            <body schema="ErrorResponse">
+              <field name="detail" type="string" example="Email already registered" />
+            </body>
+          </status>
+          <status code="422">
+            <body schema="ValidationError">
+              <notes>FastAPI validation error payload</notes>
+            </body>
+          </status>
+        </response>
+        <businessRules>
+          <rule>Uploads photo and card to storage provider and stores resulting URLs in Player</rule>
+          <rule>Sets registration_status to PENDING_PAYMENT</rule>
+        </businessRules>
+      </endpoint>
+
+      <endpoint id="E2" method="POST" path="/payments/create-order">
+        <summary>Create Razorpay order for a player registration</summary>
+        <request>
+          <contentType>application/json</contentType>
+          <body schema="CreateOrderRequest">
+            <field name="player_id" type="string" required="true" />
+          </body>
+        </request>
+        <response>
+          <status code="200">
+            <body schema="CreateOrderResponse">
+              <field name="razorpay_order_id" type="string" />
+              <field name="amount" type="int" />
+              <field name="currency" type="string" />
+              <field name="player_id" type="string" />
+            </body>
+          </status>
+          <status code="404">
+            <body schema="ErrorResponse">
+              <field name="detail" type="string" example="Player not found" />
+            </body>
+          </status>
+          <status code="409">
+            <body schema="ErrorResponse">
+              <field name="detail" type="string" example="Already paid" />
+            </body>
+          </status>
+        </response>
+        <businessRules>
+          <rule>Fee amount is sourced from backend configuration (REGISTRATION_FEE_INR)</rule>
+          <rule>Creates Payment record with status CREATED</rule>
+          <rule>Returns order_id to frontend for Razorpay checkout</rule>
+        </businessRules>
+      </endpoint>
+
+      <endpoint id="E3" method="POST" path="/payments/verify">
+        <summary>Verify Razorpay payment signature and mark registration as paid</summary>
+        <request>
+          <contentType>application/json</contentType>
+          <body schema="VerifyPaymentRequest">
+            <field name="player_id" type="string" required="true" />
+            <field name="razorpay_order_id" type="string" required="true" />
+            <field name="razorpay_payment_id" type="string" required="true" />
+            <field name="razorpay_signature" type="string" required="true" />
+          </body>
+        </request>
+        <response>
+          <status code="200">
+            <body schema="VerifyPaymentResponse">
+              <field name="status" type="string" example="CAPTURED" />
+              <field name="message" type="string" example="Payment verified" />
+            </body>
+          </status>
+          <status code="400">
+            <body schema="ErrorResponse">
+              <field name="detail" type="string" example="Invalid signature" />
+            </body>
+          </status>
+          <status code="404">
+            <body schema="ErrorResponse">
+              <field name="detail" type="string" example="Payment record not found" />
+            </body>
+          </status>
+        </response>
+        <businessRules>
+          <rule>Server verifies signature using Razorpay key_secret (never trust client alone)</rule>
+          <rule>On success: Payment.status=CAPTURED and Player.registration_status=PAID</rule>
+          <rule>On failure: Payment.status=FAILED; Player may remain PENDING_PAYMENT</rule>
+        </businessRules>
+      </endpoint>
+
+      <endpoint id="E4" method="POST" path="/payments/webhook" optional="true">
+        <summary>Razorpay webhook endpoint for reconciliation</summary>
+        <request>
+          <contentType>application/json</contentType>
+          <headers>
+            <header name="X-Razorpay-Signature" required="true" />
+          </headers>
+          <body schema="WebhookPayload">
+            <notes>Razorpay event payload (capture/failure/refund)</notes>
+          </body>
+        </request>
+        <response>
+          <status code="200">
+            <body schema="WebhookResponse">
+              <field name="ok" type="boolean" example="true" />
+            </body>
+          </status>
+          <status code="400">
+            <body schema="ErrorResponse">
+              <field name="detail" type="string" example="Invalid webhook signature" />
+            </body>
+          </status>
+        </response>
+        <businessRules>
+          <rule>Verify webhook signature using RAZORPAY_WEBHOOK_SECRET</rule>
+          <rule>Update Payment and Player statuses based on event type</rule>
+          <rule>Webhook is source-of-truth for final reconciliation</rule>
+        </businessRules>
+      </endpoint>
+
+      <endpoint id="E5" method="GET" path="/health">
+        <summary>Health check</summary>
+        <response>
+          <status code="200">
+            <body schema="HealthResponse">
+              <field name="status" type="string" example="ok" />
+            </body>
+          </status>
+        </response>
+      </endpoint>
+    </endpoints>
+
+    <schemas>
+      <schema name="RegisterResponse">
+        <field name="player_id" type="string" />
+        <field name="message" type="string" />
+      </schema>
+      <schema name="CreateOrderRequest">
+        <field name="player_id" type="string" />
+      </schema>
+      <schema name="CreateOrderResponse">
+        <field name="razorpay_order_id" type="string" />
+        <field name="amount" type="int" />
+        <field name="currency" type="string" />
+        <field name="player_id" type="string" />
+      </schema>
+      <schema name="VerifyPaymentRequest">
+        <field name="player_id" type="string" />
+        <field name="razorpay_order_id" type="string" />
+        <field name="razorpay_payment_id" type="string" />
+        <field name="razorpay_signature" type="string" />
+      </schema>
+      <schema name="VerifyPaymentResponse">
+        <field name="status" type="string" />
+        <field name="message" type="string" />
+      </schema>
+      <schema name="ErrorResponse">
+        <field name="detail" type="string" />
+      </schema>
+      <schema name="HealthResponse">
+        <field name="status" type="string" />
+      </schema>
+    </schemas>
+  </api>
+
+  <frontendSpec>
+    <routes>
+      <route path="/register" type="page">
+        <file>src/app/register/page.tsx</file>
+        <components>
+          <component>RegistrationForm</component>
+        </components>
+      </route>
+    </routes>
+
+    <components>
+      <component name="RegistrationForm" type="client">
+        <responsibilities>
+          <item>Render multi-step UI: Step 1 (details + files) and Step 2 (payment)</item>
+          <item>Run Zod validation and manage react-hook-form state</item>
+          <item>POST FormData to /api/register and store returned player_id</item>
+          <item>Call /api/payments/create-order then open Razorpay checkout</item>
+          <item>On success call /api/payments/verify; render confirmation view</item>
+        </responsibilities>
+        <uiGuidelines>
+          <guideline>Use shadcn Card + Form controls for consistent layout</guideline>
+          <guideline>Include stepper at top; show validation errors inline</guideline>
+          <guideline>Disable navigation buttons until current step is valid</guideline>
+          <guideline>Show upload preview and allow replacing files</guideline>
+        </uiGuidelines>
+      </component>
+
+      <component name="Stepper" type="presentational">
+        <responsibilities>
+          <item>Display step names and current progress</item>
+        </responsibilities>
+      </component>
+
+      <component name="FileUpload" type="client">
+        <responsibilities>
+          <item>Enforce accept list and client-side max size</item>
+          <item>Display selected filename and optional preview</item>
+        </responsibilities>
+      </component>
+
+      <component name="PaymentModal" type="client">
+        <responsibilities>
+          <item>Initialize Razorpay checkout with order_id</item>
+          <item>Return payment_id/signature to RegistrationForm</item>
+        </responsibilities>
+      </component>
+    </components>
+
+    <clientValidation>
+      <zodSchema name="PlayerForm">
+        <field name="first_name" type="string" minLength="2" />
+        <field name="last_name" type="string" minLength="2" />
+        <field name="email" type="string" format="email" />
+        <field name="phone" type="string" pattern="^\+?[1-9]\d{1,14}$" />
+        <field name="residential_area" type="string" />
+        <field name="firm_name" type="string" />
+        <field name="designation" type="string" />
+        <field name="photo" type="file" required="true" />
+        <field name="visiting_card" type="file" required="true" />
+      </zodSchema>
+    </clientValidation>
+
+    <networking>
+      <rule>Use relative URLs only: fetch("/api/register") etc. (Next rewrites handle dev proxy)</rule>
+      <rule>Use FormData for multipart uploads</rule>
+      <rule>Handle non-2xx responses; show user-friendly messages</rule>
+    </networking>
+  </frontendSpec>
+
+  <backendSpec>
+    <lifespan>
+      <description>Initialize MongoDB client and Beanie documents via lifespan context manager</description>
+      <steps>
+        <step order="1">Create AsyncIOMotorClient from MONGO_URL</step>
+        <step order="2">init_beanie(database=MONGO_DB, document_models=[Player, Payment])</step>
+        <step order="3">Yield to application runtime</step>
+        <step order="4">Close MongoDB client on shutdown</step>
+      </steps>
+    </lifespan>
+
+    <services>
+      <service name="StorageService">
+        <modes>
+          <mode name="local" default="true">
+            <notes>Save files under /uploads; serve via static route in dev only.</notes>
+          </mode>
+          <mode name="s3" default="false">
+            <notes>Upload to S3; store public URL or signed URL depending on policy.</notes>
+          </mode>
+        </modes>
+        <requirements>
+          <item>Generate safe filenames (UUID + extension)</item>
+          <item>Validate MIME and size</item>
+          <item>Return URL string</item>
+        </requirements>
+      </service>
+
+      <service name="RazorpayService">
+        <requirements>
+          <item>Create order with amount/currency and optional receipt reference</item>
+          <item>Verify checkout signature server-side</item>
+          <item>Verify webhook signature (optional but recommended)</item>
+        </requirements>
+      </service>
+    </services>
+
+    <errorHandling>
+      <principles>
+        <item>Return 422 for validation errors (FastAPI default)</item>
+        <item>Return 409 for uniqueness conflicts (email/phone duplicates)</item>
+        <item>Return 400 for payment signature mismatch</item>
+        <item>Return 404 for missing player/payment records</item>
+      </principles>
+      <responses>
+        <response code="409">
+          <example>{"detail":"Email already registered"}</example>
+        </response>
+        <response code="400">
+          <example>{"detail":"Invalid signature"}</example>
+        </response>
+      </responses>
+    </errorHandling>
+  </backendSpec>
+
+  <security>
+    <dataProtection>
+      <item>Never expose Razorpay secret keys to frontend</item>
+      <item>Store only necessary payment identifiers; avoid storing sensitive card data</item>
+      <item>Validate and sanitize all uploaded files</item>
+    </dataProtection>
+    <cors>
+      <rule>In dev, allow localhost origins; in prod, set explicit allowed domains</rule>
+    </cors>
+    <rateLimiting optional="true">
+      <notes>Consider rate limiting /register and /payments endpoints to prevent abuse.</notes>
+    </rateLimiting>
+  </security>
+
+  <observability>
+    <logging>
+      <item>Log registration creation with player_id</item>
+      <item>Log payment order creation with razorpay_order_id</item>
+      <item>Log verification outcomes (success/failure) without leaking secrets</item>
+    </logging>
+    <metrics optional="true">
+      <item>Count registrations created per day</item>
+      <item>Payment success/failure rates</item>
+    </metrics>
+  </observability>
+
+  <deployment>
+    <localDevelopment>
+      <options>
+        <option id="P1">Deploy frontend on Vercel, backend on a container host (Render/Fly/ECS), Mongo managed</option>
+        <option id="P2">Deploy both via docker-compose on a single VM with reverse proxy (Nginx/Caddy)</option>
+      </options>
+      <requirements>
+        <item>Webhook endpoint must be publicly reachable if enabled</item>
+        <item>Set strict CORS origins</item>
+        <item>Use S3 storage for uploaded files</item>
+      </requirements>
+    </localDevelopment>
+  </deployment>
+
+  <acceptanceCriteria>
+    <criterion id="AC1">User can complete step 1 and receives a player_id</criterion>
+    <criterion id="AC3">Successful payment updates Payment.status=CAPTURED and Player.registration_status=PAID</criterion>
+    <criterion id="AC4">Duplicate email or phone attempts return a 409 with clear message</criterion>
+    <criterion id="AC5">Invalid payment signature returns 400 and does not mark player as PAID</criterion>
+    <criterion id="AC6">File validation rejects disallowed types or oversize uploads</criterion>
+  </acceptanceCriteria>
+
+  <futureEnhancements>
+    <item>Add admin panel to list players and payments</item>
+    <item>Send confirmation email/SMS on payment success</item>
+    <item>Add downloadable receipt/invoice</item>
+    <item>Implement webhook reconciliation as mandatory for production</item>
+    <item>Add resumable uploads (optional) for poor connectivity scenarios</item>
+  </futureEnhancements>
+</techSpec>
