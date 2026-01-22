@@ -9,7 +9,10 @@ from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-ROOT_ENV_PATH = Path(__file__).resolve().parents[4] / ".env"
+# Locate the nearest .env walking upward; fall back to ./env at runtime.
+ROOT_ENV_PATH = next(
+	(p / ".env") for p in Path(__file__).resolve().parents if (p / ".env").exists()
+)
 load_dotenv(ROOT_ENV_PATH, override=False)
 
 
@@ -33,7 +36,7 @@ class Settings(BaseSettings):
 	model_config = SettingsConfigDict(
 		env_file=ROOT_ENV_PATH,
 		env_file_encoding="utf-8",
-		extra="ignore"
+		extra="ignore",
 	)
 
 
