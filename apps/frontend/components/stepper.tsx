@@ -27,9 +27,9 @@ export function Stepper({ steps, activeIndex }: StepperProps) {
               <div
                 className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-3 text-xs font-bold transition ${
                   isCompleted
-                    ? "border-blue-100 bg-blue-600 text-white shadow-md shadow-blue-200 dark:border-blue-900 dark:shadow-blue-900/50"
+                    ? "border-blue-100 bg-blue-600 text-white shadow-md shadow-blue-200 dark:border-blue-900 dark:shadow-none"
                     : isActive
-                      ? "border-blue-100 bg-blue-600 text-white shadow-md shadow-blue-200 dark:border-blue-900 dark:shadow-blue-900/50"
+                      ? "border-blue-100 bg-blue-600 text-white shadow-md shadow-blue-200 dark:border-blue-900 dark:shadow-none"
                       : "border-slate-200 bg-white text-slate-500 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-400"
                 }`}
               >
@@ -53,12 +53,12 @@ export function Stepper({ steps, activeIndex }: StepperProps) {
               </div>
               <div className="flex flex-col gap-0">
                 <span
-                  className={`text-xs font-semibold ${isActive || isCompleted ? "text-slate-900 dark:text-white" : "text-slate-500 dark:text-slate-400"}`}
+                  className={`text-xs font-semibold ${isActive || isCompleted ? "text-slate-900 dark:text-white" : "text-slate-500 dark:text-white"}`}
                 >
                   {step.label}
                 </span>
                 {step.helper ? (
-                  <span className="text-xs text-slate-500 dark:text-slate-400">
+                  <span className="text-xs text-slate-500 dark:text-white">
                     {step.helper}
                   </span>
                 ) : null}
@@ -87,10 +87,10 @@ export function Stepper({ steps, activeIndex }: StepperProps) {
                 <div
                   className={`flex h-10 w-10 items-center justify-center rounded-full border-3 text-sm font-bold shadow-lg transition ${
                     isCompleted
-                      ? "border-blue-100 bg-blue-600 text-white shadow-blue-200"
+                      ? "border-blue-100 bg-blue-600 text-white shadow-blue-200 dark:shadow-none"
                       : isActive
-                        ? "border-blue-100 bg-blue-600 text-white shadow-blue-200"
-                        : "border-slate-200 bg-white text-slate-500 shadow-slate-100"
+                        ? "border-blue-100 bg-blue-600 text-white shadow-blue-200 dark:shadow-none"
+                        : "border-slate-200 bg-white text-slate-500 shadow-slate-100 dark:shadow-none"
                   }`}
                 >
                   {isCompleted ? (
@@ -113,12 +113,12 @@ export function Stepper({ steps, activeIndex }: StepperProps) {
                 </div>
                 <div className="mt-3 flex flex-col items-center gap-0.5 text-center">
                   <span
-                    className={`text-xs font-semibold ${isActive || isCompleted ? "text-slate-900" : "text-slate-500"}`}
+                    className={`text-xs font-semibold ${isActive || isCompleted ? "text-slate-900 dark:text-white" : "text-slate-500 dark:text-white"}`}
                   >
                     {step.label}
                   </span>
                   {step.helper ? (
-                    <span className="text-xs text-slate-500">
+                    <span className="text-xs text-slate-500 dark:text-white">
                       {step.helper}
                     </span>
                   ) : null}

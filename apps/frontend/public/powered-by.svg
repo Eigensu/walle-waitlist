@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 100" role="img" aria-label="Powered By">
+  <defs>
+    <linearGradient id="pbg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#22c55e"/>
+      <stop offset="1" stop-color="#3b82f6"/>
+    </linearGradient>
+  </defs>
+  <rect x="10" y="10" rx="16" width="300" height="80" fill="url(#pbg)" opacity="0.85"/>
+  <circle cx="60" cy="50" r="20" fill="#ffffff" opacity="0.35"/>
+  <rect x="50" y="40" width="20" height="20" rx="4" fill="#ffffff" opacity="0.55"/>
+  <text x="180" y="62" text-anchor="middle" font-size="22" font-family="system-ui, -apple-system, Segoe UI, Roboto" fill="#ffffff" font-weight="700">POWERED BY</text>
+</svg>

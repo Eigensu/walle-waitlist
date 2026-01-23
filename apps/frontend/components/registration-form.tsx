@@ -375,7 +375,7 @@ export function RegistrationForm() {
               <div className="rounded-2xl border-2 border-blue-200 bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-6 shadow-lg dark:border-blue-900/40 dark:from-blue-950/20 dark:via-slate-800/30 dark:to-slate-800/20">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-blue-600 dark:text-blue-400">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-blue-600 dark:text-white">
                       Player Name
                     </p>
                     <p className="mt-1 text-lg font-semibold text-blue-900 dark:text-white">
@@ -383,7 +383,7 @@ export function RegistrationForm() {
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-blue-600 dark:text-blue-400">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-blue-600 dark:text-white">
                       Registration Fee
                     </p>
                     <p className="mt-1 text-3xl font-bold text-blue-900 dark:text-white">
@@ -412,10 +412,10 @@ export function RegistrationForm() {
                     </svg>
                   </div>
                   <div className="text-sm">
-                    <p className="font-semibold text-blue-900 dark:text-blue-300">
+                    <p className="font-semibold text-blue-900 dark:text-white">
                       Ready to complete payment
                     </p>
-                    <p className="mt-1 text-blue-700 dark:text-blue-400">
+                    <p className="mt-1 text-blue-700 dark:text-white">
                       Click proceed to open the secure Razorpay checkout. You
                       will return here for confirmation after payment.
                     </p>
@@ -444,14 +444,14 @@ export function RegistrationForm() {
                   </svg>
                 </div>
                 <div>
-                  <p className="text-xl font-bold text-green-900 dark:text-green-300">
+                  <p className="text-xl font-bold text-green-900 dark:text-white">
                     Payment Confirmed!
                   </p>
-                  <p className="mt-1 text-green-700 dark:text-green-400">
+                  <p className="mt-1 text-green-700 dark:text-white">
                     Thank you for registering with Walle Arena. Your spot is
                     confirmed and we've received your payment.
                   </p>
-                  <p className="mt-3 text-sm text-green-600">
+                  <p className="mt-3 text-sm text-green-600 dark:text-white">
                     Player ID:{" "}
                     <span className="font-mono font-semibold">{playerId}</span>
                   </p>
@@ -508,7 +508,7 @@ export function RegistrationForm() {
               <Button
                 type="submit"
                 disabled={disabledNext}
-                className="bg-blue-600 text-white hover:bg-blue-700 shadow-md shadow-blue-200"
+                className="bg-blue-600 text-white hover:bg-blue-700 shadow-md shadow-blue-200 dark:shadow-none"
               >
                 {submitting ? (
                   <>
@@ -542,7 +542,7 @@ export function RegistrationForm() {
                   type="button"
                   variant="outline"
                   onClick={() => setStepIndex(0)}
-                  className="border-blue-300 text-blue-700 hover:bg-blue-50"
+                  className="border-blue-300 text-blue-700 hover:bg-blue-50 dark:shadow-none"
                 >
                   <svg
                     className="mr-2 h-4 w-4"
@@ -563,7 +563,7 @@ export function RegistrationForm() {
                   type="button"
                   onClick={startPayment}
                   disabled={submitting || paymentStatus === "processing"}
-                  className="bg-blue-600 text-white hover:bg-blue-700 shadow-md shadow-blue-200"
+                  className="bg-blue-600 text-white hover:bg-blue-700 shadow-md shadow-blue-200 dark:shadow-none"
                 >
                   {submitting ? (
                     <>
@@ -596,7 +596,7 @@ export function RegistrationForm() {
               <Button
                 type="button"
                 onClick={resetForm}
-                className="bg-blue-600 text-white hover:bg-blue-700 shadow-md shadow-blue-200"
+                className="bg-blue-600 text-white hover:bg-blue-700 shadow-md shadow-blue-200 dark:shadow-none"
               >
                 Register Another Player
               </Button>
