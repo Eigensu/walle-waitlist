@@ -16,6 +16,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Walle Registration",
   description: "Two-step registration and payment for Walle Arena",
+  icons: {
+    icon: "/walle-logo.png",
+  },
 };
 
 export default function RootLayout({

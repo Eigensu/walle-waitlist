@@ -48,14 +48,14 @@ export default function RegisterPage() {
               By registering, you agree to our{" "}
               <a
                 className="font-semibold text-blue-600 hover:underline dark:text-blue-400 dark:hover:text-blue-300"
-                href="#"
+                href="/terms-of-service"
               >
                 Terms of Service
               </a>{" "}
               and{" "}
               <a
                 className="font-semibold text-blue-600 hover:underline dark:text-blue-400 dark:hover:text-blue-300"
-                href="#"
+                href="/privacy-policy"
               >
                 Privacy Policy
               </a>
