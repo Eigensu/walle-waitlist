@@ -18,6 +18,7 @@ bcrypt==3.2.2
 # File handling
 aiofiles==24.1.0
 python-magic==0.4.27
+cloudinary==1.41.0
 
 # Configuration
 python-dotenv==1.2.1

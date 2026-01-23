@@ -26,11 +26,16 @@ class Settings(BaseSettings):
 
 	registration_fee_inr: int = Field(default=12500, alias="REGISTRATION_FEE_INR")
 
-	storage_mode: Literal["local", "s3"] = Field(default="local", alias="STORAGE_MODE")
+	storage_mode: Literal["local", "s3", "cloudinary"] = Field(default="local", alias="STORAGE_MODE")
 	s3_bucket: str | None = Field(default=None, alias="S3_BUCKET")
 	s3_region: str | None = Field(default=None, alias="S3_REGION")
 	s3_access_key_id: str | None = Field(default=None, alias="S3_ACCESS_KEY_ID")
 	s3_secret_access_key: str | None = Field(default=None, alias="S3_SECRET_ACCESS_KEY")
+
+	cloudinary_cloud_name: str | None = Field(default=None, alias="CLOUDINARY_CLOUD_NAME")
+	cloudinary_api_key: str | None = Field(default=None, alias="CLOUDINARY_API_KEY")
+	cloudinary_api_secret: str | None = Field(default=None, alias="CLOUDINARY_API_SECRET")
+	cloudinary_folder: str = Field(default="walle-register", alias="CLOUDINARY_FOLDER")
 
 	model_config = SettingsConfigDict(
 		env_file=ROOT_ENV_PATH,

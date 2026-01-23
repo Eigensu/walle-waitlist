@@ -24,7 +24,15 @@ async def lifespan(app: FastAPI):
     database = client[settings.mongo_db]
     await init_beanie(database=database, document_models=[Player, Payment])
 
-    storage = build_storage_service(settings.storage_mode, UPLOADS_DIR, base_url="/uploads")
+    storage = build_storage_service(
+        settings.storage_mode, 
+        UPLOADS_DIR, 
+        base_url="/uploads",
+        cloudinary_cloud_name=settings.cloudinary_cloud_name,
+        cloudinary_api_key=settings.cloudinary_api_key,
+        cloudinary_api_secret=settings.cloudinary_api_secret,
+        cloudinary_folder=settings.cloudinary_folder
+    )
     razorpay = RazorpayService(settings.razorpay_key_id, settings.razorpay_key_secret)
 
     app.state.storage = storage
