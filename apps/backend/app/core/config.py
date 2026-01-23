@@ -37,6 +37,9 @@ class Settings(BaseSettings):
 	cloudinary_api_secret: str | None = Field(default=None, alias="CLOUDINARY_API_SECRET")
 	cloudinary_folder: str = Field(default="walle-register", alias="CLOUDINARY_FOLDER")
 
+	admin_username: str = Field(default="admin", alias="ADMIN_USERNAME")
+	admin_password: str = Field(..., alias="ADMIN_PASSWORD")
+
 	model_config = SettingsConfigDict(
 		env_file=ROOT_ENV_PATH,
 		env_file_encoding="utf-8",

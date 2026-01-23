@@ -10,7 +10,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from app.core.config import get_settings
 from app.models.payment import Payment
 from app.models.player import Player
-from app.routers import payments, registration
+from app.routers import payments, registration, admin
 from app.services.razorpay import RazorpayService
 from app.services.storage import build_storage_service
 
@@ -57,6 +57,7 @@ app.add_middleware(
 
 app.include_router(registration.router)
 app.include_router(payments.router)
+app.include_router(admin.router)
 
 app.mount("/uploads", StaticFiles(directory=UPLOADS_DIR), name="uploads")
 

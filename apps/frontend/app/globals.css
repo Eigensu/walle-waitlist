@@ -123,3 +123,50 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* React Data Grid Styling */
+.rdg {
+  --rdg-color: oklch(0.2 0 0);
+  --rdg-border-color: oklch(0.9 0 0);
+  --rdg-summary-border-color: oklch(0.9 0 0);
+  --rdg-background-color: oklch(1 0 0);
+  --rdg-header-background-color: oklch(0.98 0 0);
+  --rdg-row-hover-background-color: oklch(0.96 0 0);
+  --rdg-row-selected-background-color: oklch(0.93 0.05 264);
+  --rdg-row-selected-hover-background-color: oklch(0.9 0.05 264);
+
+  border: 1px solid var(--rdg-border-color);
+  block-size: 100%;
+  inline-size: 100%;
+
+  /* Header styling */
+  & .rdg-header-row {
+    background-color: var(--rdg-header-background-color);
+    font-weight: 600;
+    font-size: 13px;
+  }
+
+  /* Cell styling */
+  & .rdg-cell {
+    padding: 8px 12px;
+    border-inline-end: 1px solid var(--rdg-border-color);
+    border-block-end: 1px solid var(--rdg-border-color);
+  }
+
+  /* Row hover effect */
+  & .rdg-row:hover {
+    background-color: var(--rdg-row-hover-background-color);
+  }
+}
+
+/* Dark mode support */
+.dark .rdg {
+  --rdg-color: oklch(0.9 0 0);
+  --rdg-border-color: oklch(0.3 0 0);
+  --rdg-summary-border-color: oklch(0.3 0 0);
+  --rdg-background-color: oklch(0.15 0 0);
+  --rdg-header-background-color: oklch(0.2 0 0);
+  --rdg-row-hover-background-color: oklch(0.25 0 0);
+  --rdg-row-selected-background-color: oklch(0.3 0.05 264);
+  --rdg-row-selected-hover-background-color: oklch(0.35 0.05 264);
+}
