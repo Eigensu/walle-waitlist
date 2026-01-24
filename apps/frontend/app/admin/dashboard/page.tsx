@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Download, LogOut } from "lucide-react";
+import { Loader2, Download, LogOut, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -12,6 +12,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { DataGrid, type Column, type SortColumn } from "react-data-grid";
 import "react-data-grid/lib/styles.css";
 
@@ -27,6 +34,15 @@ interface Player {
   registration_status: string;
   payment_status: string | null;
   created_at: string | null;
+  played_before?: string;
+  batting_type?: string;
+  bowling_type?: string;
+  wicket_keeper?: string;
+  name_on_jersey?: string;
+  tshirt_size?: string;
+  waist_size?: number;
+  played_jypl_s7?: string;
+  jypl_s7_team?: string;
 }
 
 export default function AdminDashboard() {
@@ -37,6 +53,8 @@ export default function AdminDashboard() {
   const [exporting, setExporting] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortColumns, setSortColumns] = useState<readonly SortColumn[]>([]);
+  const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
 
   useEffect(() => {
     const fetchPlayers = async () => {
@@ -182,6 +200,26 @@ export default function AdminDashboard() {
         props.row.created_at
           ? new Date(props.row.created_at).toLocaleDateString()
           : "—",
+    },
+    {
+      key: "actions",
+      name: "Actions",
+      width: 100,
+      sortable: false,
+      renderCell: (props: { row: Player }) => (
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => {
+            setSelectedPlayer(props.row);
+            setDetailsDialogOpen(true);
+          }}
+          className="border-blue-300 text-blue-700 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-400 dark:hover:bg-blue-950/30"
+        >
+          <Eye className="mr-1 h-3 w-3" />
+          Details
+        </Button>
+      ),
     },
   ];
 
@@ -387,6 +425,259 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Details Modal */}
+      <Dialog open={detailsDialogOpen} onOpenChange={setDetailsDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Player Details</DialogTitle>
+            <DialogDescription>
+              Complete registration information for{" "}
+              {selectedPlayer
+                ? `${selectedPlayer.first_name} ${selectedPlayer.last_name}`
+                : "player"}
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedPlayer && (
+            <div className="space-y-6">
+              {/* Personal Details */}
+              <div>
+                <h3 className="text-lg font-semibold mb-4 text-slate-900 dark:text-white">
+                  Personal Details
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                      First Name
+                    </p>
+                    <p className="mt-1 text-slate-900 dark:text-white">
+                      {selectedPlayer.first_name}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                      Last Name
+                    </p>
+                    <p className="mt-1 text-slate-900 dark:text-white">
+                      {selectedPlayer.last_name}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                      Email
+                    </p>
+                    <p className="mt-1 text-slate-900 dark:text-white">
+                      {selectedPlayer.email}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                      Phone
+                    </p>
+                    <p className="mt-1 text-slate-900 dark:text-white">
+                      {selectedPlayer.phone}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                      Residential Area
+                    </p>
+                    <p className="mt-1 text-slate-900 dark:text-white">
+                      {selectedPlayer.residential_area}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                      Played Before
+                    </p>
+                    <p className="mt-1 text-slate-900 dark:text-white capitalize">
+                      {selectedPlayer.played_before || "—"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Professional Details */}
+              <div>
+                <h3 className="text-lg font-semibold mb-4 text-slate-900 dark:text-white">
+                  Professional Details
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                      Firm Name
+                    </p>
+                    <p className="mt-1 text-slate-900 dark:text-white">
+                      {selectedPlayer.firm_name}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                      Designation
+                    </p>
+                    <p className="mt-1 text-slate-900 dark:text-white">
+                      {selectedPlayer.designation}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Cricket Details */}
+              <div>
+                <h3 className="text-lg font-semibold mb-4 text-slate-900 dark:text-white">
+                  Cricket Profile
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                      Batting Type
+                    </p>
+                    <p className="mt-1 text-slate-900 dark:text-white capitalize">
+                      {selectedPlayer.batting_type || "—"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                      Bowling Type
+                    </p>
+                    <p className="mt-1 text-slate-900 dark:text-white capitalize">
+                      {selectedPlayer.bowling_type || "—"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                      Wicket Keeper
+                    </p>
+                    <p className="mt-1 text-slate-900 dark:text-white capitalize">
+                      {selectedPlayer.wicket_keeper || "—"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Jersey Details */}
+              <div>
+                <h3 className="text-lg font-semibold mb-4 text-slate-900 dark:text-white">
+                  Jersey Details
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                      Name on Jersey
+                    </p>
+                    <p className="mt-1 text-slate-900 dark:text-white">
+                      {selectedPlayer.name_on_jersey || "—"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                      T-Shirt Size
+                    </p>
+                    <p className="mt-1 text-slate-900 dark:text-white">
+                      {selectedPlayer.tshirt_size || "—"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                      Waist Size
+                    </p>
+                    <p className="mt-1 text-slate-900 dark:text-white">
+                      {selectedPlayer.waist_size
+                        ? `${selectedPlayer.waist_size}"`
+                        : "—"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* JYPL Season 7 */}
+              <div>
+                <h3 className="text-lg font-semibold mb-4 text-slate-900 dark:text-white">
+                  JYPL Season 7
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                      Played in Season 7
+                    </p>
+                    <p className="mt-1 text-slate-900 dark:text-white capitalize">
+                      {selectedPlayer.played_jypl_s7 || "—"}
+                    </p>
+                  </div>
+                  {selectedPlayer.played_jypl_s7 === "yes" && (
+                    <div>
+                      <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                        Team Name
+                      </p>
+                      <p className="mt-1 text-slate-900 dark:text-white">
+                        {selectedPlayer.jypl_s7_team || "—"}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Registration Status */}
+              <div>
+                <h3 className="text-lg font-semibold mb-4 text-slate-900 dark:text-white">
+                  Status
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                      Registration Status
+                    </p>
+                    <p className="mt-1">
+                      <span
+                        className={`inline-block rounded-full px-3 py-1 text-sm font-semibold ${
+                          selectedPlayer.registration_status === "PAID"
+                            ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                            : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400"
+                        }`}
+                      >
+                        {selectedPlayer.registration_status}
+                      </span>
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                      Payment Status
+                    </p>
+                    <p className="mt-1">
+                      {selectedPlayer.payment_status ? (
+                        <span
+                          className={`inline-block rounded-full px-3 py-1 text-sm font-semibold ${
+                            selectedPlayer.payment_status === "CAPTURED"
+                              ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                              : "bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-400"
+                          }`}
+                        >
+                          {selectedPlayer.payment_status}
+                        </span>
+                      ) : (
+                        <span className="text-slate-500 dark:text-slate-400">
+                          —
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                      Registered At
+                    </p>
+                    <p className="mt-1 text-slate-900 dark:text-white">
+                      {selectedPlayer.created_at
+                        ? new Date(selectedPlayer.created_at).toLocaleString()
+                        : "—"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
