@@ -827,6 +827,9 @@ export function RegistrationForm() {
                         <option value="l">L</option>
                         <option value="xl">XL</option>
                         <option value="xxl">XXL</option>
+                        <option value="xxxl">3XL</option>
+                        <option value="xxxxl">4XL</option>
+                        <option value="xxxxxl">5XL</option>
                       </select>
                     </FormControl>
                     <FormMessage />
@@ -866,7 +869,7 @@ export function RegistrationForm() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-base font-semibold">
-                      Have you played in JYPL season 7, 2024?
+                      Have you played in season 8, 2025?
                     </FormLabel>
                     <FormControl>
                       <div className="flex gap-6">
@@ -1044,7 +1047,7 @@ export function RegistrationForm() {
                   </p>
                   <p className="mt-1 text-green-700 dark:text-white">
                     Thank you for registering with Walle Arena. Your spot is
-                    confirmed and we've received your payment.
+                    confirmed and we&aposve received your payment.
                   </p>
                   <p className="mt-3 text-sm text-green-600 dark:text-white">
                     Player ID:{" "}

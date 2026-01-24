@@ -832,10 +832,14 @@ export default function AdminDashboard() {
                 ) : (
                   <div className="rounded-lg bg-slate-100 dark:bg-slate-800 p-4">
                     <p className="text-2xl font-bold text-slate-900 dark:text-white">
-                      ₹ {(selectedPlayer.payment_amount || 0).toLocaleString("en-IN", {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })}
+                      ₹{" "}
+                      {(selectedPlayer.payment_amount || 0).toLocaleString(
+                        "en-IN",
+                        {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        },
+                      )}
                     </p>
                   </div>
                 )}
