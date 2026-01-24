@@ -17,11 +17,8 @@ export const metadata: Metadata = {
   title: "Walle Registration",
   description: "Two-step registration and payment for Walle Arena",
   icons: {
-    icon: [
-      { url: "/walle-logo.png", sizes: "any" },
-      { url: "/JYPL Logo.png", sizes: "32x32", type: "image/png" },
-    ],
-    apple: "/walle-logo.png",
+    icon: [{ url: "/JYPL Logo.png", sizes: "any", type: "image/png" }],
+    apple: "/JYPL Logo.png",
   },
 };
 
