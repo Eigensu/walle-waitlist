@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useId } from "react";
+import { useMemo, useRef, useId, useState } from "react";
 import { UploadCloud } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ export type FileUploadProps = {
   label: string;
   description?: string;
   accept?: string;
+  maxBytes?: number;
   value?: File | null;
   onChange: (file: File | null) => void;
   error?: string;
@@ -21,6 +22,7 @@ export function FileUpload({
   label,
   description,
   accept,
+  maxBytes = 10 * 1024 * 1024,
   value,
   onChange,
   error,
@@ -28,6 +30,7 @@ export function FileUpload({
 }: FileUploadProps) {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const inputId = useId();
+  const [localError, setLocalError] = useState<string | null>(null);
 
   const prettySize = useMemo(() => {
     if (!value) return null;
@@ -69,6 +72,39 @@ export function FileUpload({
           aria-describedby={hint ? `${inputId}-hint` : undefined}
           onChange={(event) => {
             const file = event.target.files?.[0];
+            setLocalError(null);
+
+            if (!file) {
+              onChange(null);
+              return;
+            }
+
+            const allowedTypes = accept
+              ?.split(",")
+              .map((t) => t.trim())
+              .filter(Boolean);
+
+            if (file.size > maxBytes) {
+              const mb = maxBytes / (1024 * 1024);
+              setLocalError(
+                `File is too large. Max ${mb.toFixed(0)}MB allowed.`,
+              );
+              onChange(null);
+              return;
+            }
+
+            if (
+              allowedTypes &&
+              allowedTypes.length > 0 &&
+              !allowedTypes.includes(file.type)
+            ) {
+              setLocalError(
+                `Unsupported file type (${file.type || "unknown"}). Allowed: ${allowedTypes.join(", ")}`,
+              );
+              onChange(null);
+              return;
+            }
+
             onChange(file ?? null);
           }}
           className="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
@@ -81,7 +117,7 @@ export function FileUpload({
             Drop your file here, or click to browse
           </p>
           <p className="text-xs text-slate-500 dark:text-slate-400 sm:text-sm">
-            {description ?? "JPEG, PNG, WebP, or PDF (max 5MB)"}
+            {description ?? "JPEG, PNG, HEIC/HEIF, or PDF (max 10MB)"}
           </p>
         </div>
         <div className="text-xs text-slate-500 dark:text-slate-400">
@@ -104,6 +140,8 @@ export function FileUpload({
         </Button>
         {error ? (
           <FormMessage className="mt-1 text-sm">{error}</FormMessage>
+        ) : localError ? (
+          <p className="mt-1 text-sm text-destructive">{localError}</p>
         ) : null}
       </div>
     </div>

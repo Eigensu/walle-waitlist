@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, ShieldCheck } from "lucide-react";
 import { useForm } from "react-hook-form";
 
@@ -26,11 +25,7 @@ import {
   verifyPayment,
   type CreateOrderResponse,
 } from "@/lib/api";
-import {
-  fileConstraints,
-  playerSchema,
-  type PlayerFormValues,
-} from "@/lib/validators";
+import { fileConstraints, type PlayerFormValues } from "@/lib/validators";
 
 const steps = [
   {
@@ -55,7 +50,6 @@ type StatusMessage = { kind: "success" | "error"; text: string } | null;
 
 export function RegistrationForm() {
   const form = useForm<PlayerFormValues>({
-    resolver: zodResolver(playerSchema),
     mode: "onChange",
     defaultValues: {
       played_before: "",

@@ -1,16 +1,26 @@
 import { z } from "zod";
 
-const FILE_MAX_BYTES = 5 * 1024 * 1024;
-const PHOTO_MIMES = ["image/jpeg", "image/png"] as const;
-const CARD_MIMES = ["image/jpeg", "image/png", "application/pdf"] as const;
+const FILE_MAX_BYTES = 10 * 1024 * 1024;
+const PHOTO_MIMES = [
+  "image/jpeg",
+  "image/png",
+  "image/heic",
+  "image/heif",
+] as const;
+const CARD_MIMES = [
+  "image/jpeg",
+  "image/png",
+  "image/heic",
+  "image/heif",
+  "application/pdf",
+] as const;
 
-const baseString = z.string().trim();
 
 const fileSchema = (allowed: readonly string[]) =>
   z
     .instanceof(File)
     .refine((file) => file.size > 0, "File is required")
-    .refine((file) => file.size <= FILE_MAX_BYTES, "File must be under 5MB")
+    .refine((file) => file.size <= FILE_MAX_BYTES, "File must be under 10MB")
     .refine(
       (file) => allowed.includes(file.type),
       `Unsupported file type. Allowed: ${allowed.join(", ")}`
@@ -32,7 +42,7 @@ export const playerSchema = z.object({
   wicket_keeper: z.string(),
   name_on_jersey: z.string(),
   tshirt_size: z.string(),
-  waist_size: z.number(),
+  waist_size: z.coerce.number(),
   played_jypl_s7: z.string(),
   jypl_s7_team: z.string(),
   photo: z.instanceof(File).nullable(),

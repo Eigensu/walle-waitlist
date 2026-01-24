@@ -9,9 +9,9 @@ from app.services.storage import StorageService
 
 router = APIRouter(prefix="/api", tags=["registration"])
 
-MAX_FILE_BYTES = 5 * 1024 * 1024
-PHOTO_MIMES = {"image/jpeg", "image/png"}
-CARD_MIMES = {"image/jpeg", "image/png", "application/pdf"}
+MAX_FILE_BYTES = 10 * 1024 * 1024
+PHOTO_MIMES = {"image/jpeg", "image/png", "image/heic", "image/heif"}
+CARD_MIMES = {"image/jpeg", "image/png", "image/heic", "image/heif", "application/pdf"}
 
 
 class RegisterResponse(BaseModel):

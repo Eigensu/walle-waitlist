@@ -47,6 +47,8 @@ class StorageService:
         mapping = {
             "image/jpeg": ".jpg",
             "image/png": ".png",
+            "image/heic": ".heic",
+            "image/heif": ".heif",
             "application/pdf": ".pdf",
         }
         return mapping.get(content_type, "")
