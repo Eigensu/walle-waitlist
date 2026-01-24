@@ -32,7 +32,9 @@ export const playerSchema = z.object({
   first_name: z.string(),
   last_name: z.string(),
   email: z.string(),
-  phone: z.string(),
+  phone: z
+    .string()
+    .regex(/\d{10,}/, "Phone must have at least 10 digits"),
   residential_area: z.string(),
   firm_name: z.string(),
   designation: z.string(),

@@ -437,7 +437,7 @@ export function RegistrationForm() {
                         />
                       </FormControl>
                       <FormDescription>
-                        E.164 format (country code required)
+                        Min 10 digits; include country code if applicable
                       </FormDescription>
                       <FormMessage />
                     </FormItem>

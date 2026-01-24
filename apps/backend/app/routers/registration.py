@@ -41,6 +41,12 @@ async def register_player(
     cfg = await AppConfig.find_one({})
     if cfg and not cfg.registration_open:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Registration is currently closed")
+
+    # Basic phone validation: require at least 10 digits (ignoring formatting)
+    digit_only_phone = "".join(ch for ch in phone if ch.isdigit())
+    if len(digit_only_phone) < 10:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Phone must have at least 10 digits")
+
     # Duplicate checks
     if await Player.find_one(Player.email == email):
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already registered")
