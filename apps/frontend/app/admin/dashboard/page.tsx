@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Download, LogOut, Eye } from "lucide-react";
+import { Loader2, Download, LogOut, Eye, Edit2, X, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -33,6 +33,7 @@ interface Player {
   designation: string;
   registration_status: string;
   payment_status: string | null;
+  payment_amount?: number;
   created_at: string | null;
   played_before?: string;
   batting_type?: string;
@@ -55,6 +56,10 @@ export default function AdminDashboard() {
   const [sortColumns, setSortColumns] = useState<readonly SortColumn[]>([]);
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
+  const [editingPayment, setEditingPayment] = useState(false);
+  const [paymentAmount, setPaymentAmount] = useState<string>("");
+  const [paymentUpdating, setPaymentUpdating] = useState(false);
+  const [paymentError, setPaymentError] = useState("");
 
   useEffect(() => {
     const fetchPlayers = async () => {
@@ -222,6 +227,69 @@ export default function AdminDashboard() {
       ),
     },
   ];
+
+  const handleUpdatePaymentAmount = async () => {
+    if (!selectedPlayer || !paymentAmount) {
+      setPaymentError("Payment amount is required");
+      return;
+    }
+
+    const amount = parseFloat(paymentAmount);
+    if (isNaN(amount) || amount <= 0) {
+      setPaymentError("Please enter a valid amount");
+      return;
+    }
+
+    setPaymentUpdating(true);
+    setPaymentError("");
+
+    try {
+      const credentials = localStorage.getItem("admin_credentials");
+      if (!credentials) {
+        router.push("/admin");
+        return;
+      }
+
+      const [username, password] = atob(credentials).split(":");
+
+      const response = await fetch(
+        `/api/admin/players/${selectedPlayer.id}/payment?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ payment_amount: amount }),
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to update payment amount");
+      }
+
+      // Update the selected player locally
+      setSelectedPlayer({
+        ...selectedPlayer,
+        payment_amount: amount,
+      });
+
+      // Update players list
+      setPlayers(
+        players.map((p) =>
+          p.id === selectedPlayer.id ? { ...p, payment_amount: amount } : p,
+        ),
+      );
+
+      setEditingPayment(false);
+      setPaymentAmount("");
+    } catch (err) {
+      setPaymentError(
+        err instanceof Error ? err.message : "Failed to update payment amount",
+      );
+    } finally {
+      setPaymentUpdating(false);
+    }
+  };
 
   const handleExportCSV = async () => {
     try {
@@ -673,6 +741,104 @@ export default function AdminDashboard() {
                     </p>
                   </div>
                 </div>
+              </div>
+
+              {/* Payment Amount Editor */}
+              <div className="border-t border-slate-200 dark:border-slate-700 pt-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
+                    Payment Amount
+                  </h3>
+                  {!editingPayment && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        setEditingPayment(true);
+                        setPaymentAmount(
+                          selectedPlayer.payment_amount?.toString() || "0",
+                        );
+                        setPaymentError("");
+                      }}
+                      className="border-blue-300 text-blue-700 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-400 dark:hover:bg-blue-950/30"
+                    >
+                      <Edit2 className="mr-1 h-3 w-3" />
+                      Edit
+                    </Button>
+                  )}
+                </div>
+
+                {editingPayment ? (
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                        Amount (₹)
+                      </label>
+                      <Input
+                        type="number"
+                        value={paymentAmount}
+                        onChange={(e) => {
+                          setPaymentAmount(e.target.value);
+                          setPaymentError("");
+                        }}
+                        placeholder="Enter payment amount"
+                        step="0.01"
+                        min="0"
+                        className="h-10 rounded-lg border-slate-200 bg-white/80 px-4 text-slate-900 placeholder:text-slate-400 shadow-sm focus-visible:border-blue-400 focus-visible:ring-blue-200 dark:border-slate-600 dark:bg-slate-700/50 dark:text-white dark:placeholder:text-slate-400 dark:focus-visible:border-blue-500 dark:focus-visible:ring-blue-900/40"
+                      />
+                    </div>
+
+                    {paymentError && (
+                      <div className="rounded-lg border-2 border-red-200 bg-red-50 p-3 text-sm text-red-900 dark:border-red-900/40 dark:bg-red-950/20 dark:text-red-400">
+                        {paymentError}
+                      </div>
+                    )}
+
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        onClick={handleUpdatePaymentAmount}
+                        disabled={paymentUpdating}
+                        className="bg-blue-600 text-white hover:bg-blue-700"
+                      >
+                        {paymentUpdating ? (
+                          <>
+                            <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                            Updating...
+                          </>
+                        ) : (
+                          <>
+                            <Check className="mr-1 h-3 w-3" />
+                            Save
+                          </>
+                        )}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setEditingPayment(false);
+                          setPaymentAmount("");
+                          setPaymentError("");
+                        }}
+                        disabled={paymentUpdating}
+                        className="border-slate-300 text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
+                      >
+                        <X className="mr-1 h-3 w-3" />
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="rounded-lg bg-slate-100 dark:bg-slate-800 p-4">
+                    <p className="text-2xl font-bold text-slate-900 dark:text-white">
+                      ₹ {(selectedPlayer.payment_amount || 0).toLocaleString("en-IN", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           )}
