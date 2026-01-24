@@ -5,10 +5,12 @@ dotenv.config({ path: path.resolve(__dirname, "../.env") })
 
 const nextConfig = {
   async rewrites() {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000"
+    
     return [
       {
         source: "/api/:path*",
-        destination: "http://127.0.0.1:8000/api/:path*",
+        destination: `${apiUrl}/api/:path*`,
       },
     ]
   },

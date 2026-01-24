@@ -1,5 +1,28 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Environment Variables
+
+### Frontend (`apps/frontend`)
+
+Create a `.env` file in the `apps/` directory (parent of frontend) with the following variables:
+
+#### Required
+- `NEXT_PUBLIC_RAZORPAY_KEY_ID` - Your Razorpay public/publishable key ID
+
+#### Optional
+- `NEXT_PUBLIC_API_URL` - Backend API base URL (default: `http://127.0.0.1:8000` for local development)
+  - For production, set this to your deployed backend URL (e.g., `https://api.yourdomain.com`)
+
+Example `.env` file:
+```bash
+NEXT_PUBLIC_RAZORPAY_KEY_ID=rzp_test_xxxxxxxxxxxxx
+NEXT_PUBLIC_API_URL=http://127.0.0.1:8000
+```
+
+### Backend (`apps/backend`)
+
+See backend documentation for required environment variables.
+
 ## Getting Started
 
 First, run the development server:
