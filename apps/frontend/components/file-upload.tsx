@@ -5,7 +5,6 @@ import { UploadCloud } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { FormDescription, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 
 export type FileUploadProps = {
   label: string;
@@ -63,12 +62,13 @@ export function FileUpload({
         }}
         className="relative flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-slate-300 bg-white/80 px-3 py-4 text-center shadow-[0_12px_36px_-24px_rgba(0,0,0,0.35)] transition hover:border-blue-300 hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-200 dark:border-slate-600 dark:bg-slate-700/30 dark:hover:border-blue-500 dark:hover:bg-slate-700/50 dark:focus-visible:ring-blue-900/40 sm:gap-3 sm:rounded-xl sm:px-4 sm:py-6"
       >
-        {/* Full-surface input overlay for mobile accessibility */}
-        <Input
+        {/* Hidden file input for mobile/desktop file selection */}
+        <input
           id={inputId}
           ref={inputRef}
           type="file"
           accept={accept}
+          capture="environment"
           aria-describedby={hint ? `${inputId}-hint` : undefined}
           onChange={(event) => {
             const file = event.target.files?.[0];
@@ -76,6 +76,10 @@ export function FileUpload({
 
             if (!file) {
               onChange(null);
+              // Reset input to allow re-selecting the same file
+              if (inputRef.current) {
+                inputRef.current.value = "";
+              }
               return;
             }
 
@@ -90,6 +94,10 @@ export function FileUpload({
                 `File is too large. Max ${mb.toFixed(0)}MB allowed.`,
               );
               onChange(null);
+              // Reset input
+              if (inputRef.current) {
+                inputRef.current.value = "";
+              }
               return;
             }
 
@@ -102,12 +110,20 @@ export function FileUpload({
                 `Unsupported file type (${file.type || "unknown"}). Allowed: ${allowedTypes.join(", ")}`,
               );
               onChange(null);
+              // Reset input
+              if (inputRef.current) {
+                inputRef.current.value = "";
+              }
               return;
             }
 
             onChange(file ?? null);
+            // Reset input to allow re-selecting the same file
+            if (inputRef.current) {
+              inputRef.current.value = "";
+            }
           }}
-          className="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
+          className="sr-only"
         />
         <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400 sm:h-14 sm:w-14">
           <UploadCloud className="size-6 sm:size-7" />
