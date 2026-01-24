@@ -144,10 +144,6 @@ export default function PrivacyPolicy() {
             <h2 className="text-2xl font-semibold mb-4">
               4. How We Use Your Information
             </h2>
-          <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">
-              4. How We Use Your Information
-            </h2>
             <p className="mb-4">
               We process your personal information for the following legitimate
               purposes:
@@ -250,8 +246,8 @@ export default function PrivacyPolicy() {
                 resets, updates)
               </li>
               <li>
-                <strong>SMS Gateway:</strong> For sending SMS notifications about
-                registration status and tournament updates
+                <strong>SMS Gateway:</strong> For sending SMS notifications
+                about registration status and tournament updates
               </li>
             </ul>
             <p className="mb-4">
@@ -319,8 +315,8 @@ export default function PrivacyPolicy() {
             </p>
             <ul className="list-disc pl-6 mb-4 space-y-2">
               <li>
-                <strong>Encryption:</strong> HTTPS/SSL encryption for all data in
-                transit; AES-256 encryption for sensitive data at rest
+                <strong>Encryption:</strong> HTTPS/SSL encryption for all data
+                in transit; AES-256 encryption for sensitive data at rest
               </li>
               <li>
                 <strong>Access Controls:</strong> Role-based access controls
@@ -328,9 +324,9 @@ export default function PrivacyPolicy() {
                 authentication for admin accounts
               </li>
               <li>
-                <strong>Password Security:</strong> Secure password hashing using
-                industry-standard algorithms (bcrypt); passwords are never stored
-                in plain text
+                <strong>Password Security:</strong> Secure password hashing
+                using industry-standard algorithms (bcrypt); passwords are never
+                stored in plain text
               </li>
               <li>
                 <strong>Regular Security Audits:</strong> Periodic security
@@ -351,8 +347,8 @@ export default function PrivacyPolicy() {
             </ul>
             <p className="mb-4 bg-yellow-50 border border-yellow-200 p-3 rounded">
               <strong>Important Notice:</strong> While we implement
-              industry-standard security measures, no method of transmission over
-              the Internet or electronic storage is 100% secure. We cannot
+              industry-standard security measures, no method of transmission
+              over the Internet or electronic storage is 100% secure. We cannot
               guarantee absolute security of your information. You are
               responsible for maintaining the confidentiality of your account
               credentials.
@@ -378,8 +374,8 @@ export default function PrivacyPolicy() {
               </li>
               <li>
                 <strong>Right to Deletion:</strong> Request deletion of your
-                personal information (subject to legal retention requirements and
-                ongoing contractual obligations)
+                personal information (subject to legal retention requirements
+                and ongoing contractual obligations)
               </li>
               <li>
                 <strong>Right to Data Portability:</strong> Request your data in
@@ -424,20 +420,20 @@ export default function PrivacyPolicy() {
             <ul className="list-disc pl-6 mb-4 space-y-2">
               <li>
                 <strong>Active Registrations:</strong> Data retained for the
-                duration of the tournament and up to 2 years after completion for
-                record-keeping
+                duration of the tournament and up to 2 years after completion
+                for record-keeping
               </li>
               <li>
-                <strong>Payment Records:</strong> Transaction data retained for 7
-                years as per Indian tax and accounting regulations
+                <strong>Payment Records:</strong> Transaction data retained for
+                7 years as per Indian tax and accounting regulations
               </li>
               <li>
-                <strong>Correspondence:</strong> Email and support communications
-                retained for 3 years
+                <strong>Correspondence:</strong> Email and support
+                communications retained for 3 years
               </li>
               <li>
-                <strong>Deleted Accounts:</strong> Upon deletion request, data is
-                anonymized or deleted within 90 days (except where legal
+                <strong>Deleted Accounts:</strong> Upon deletion request, data
+                is anonymized or deleted within 90 days (except where legal
                 retention is required)
               </li>
               <li>
@@ -446,16 +442,12 @@ export default function PrivacyPolicy() {
               </li>
             </ul>
             <p className="mb-4">
-              You may request deletion of your data at any time by contacting our
-              Grievance Officer. However, we may retain certain information as
-              required by law or legitimate business interests.
+              You may request deletion of your data at any time by contacting
+              our Grievance Officer. However, we may retain certain information
+              as required by law or legitimate business interests.
             </p>
           </section>
 
-          <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">
-              10. Cookies and Tracking Technologies
-            </h2>
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">
               10. Cookies and Tracking Technologies
@@ -466,7 +458,9 @@ export default function PrivacyPolicy() {
               provide personalized content. A cookie is a small text file stored
               on your device by your web browser.
             </p>
-            <h3 className="text-lg font-semibold mb-2">Types of Cookies We Use:</h3>
+            <h3 className="text-lg font-semibold mb-2">
+              Types of Cookies We Use:
+            </h3>
             <ul className="list-disc pl-6 mb-4 space-y-2">
               <li>
                 <strong>Essential Cookies:</strong> Required for basic website
@@ -487,9 +481,9 @@ export default function PrivacyPolicy() {
               </li>
             </ul>
             <p className="mb-4">
-              <strong>Cookie Control:</strong> You can control and manage cookies
-              through your browser settings. Most browsers allow you to block or
-              delete cookies. However, disabling cookies may affect the
+              <strong>Cookie Control:</strong> You can control and manage
+              cookies through your browser settings. Most browsers allow you to
+              block or delete cookies. However, disabling cookies may affect the
               functionality of our website and limit your access to certain
               features.
             </p>
@@ -510,22 +504,19 @@ export default function PrivacyPolicy() {
             <h2 className="text-2xl font-semibold mb-4">
               11. Children&apos;s Privacy
             </h2>
-          <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">
-              11. Children&apos;s Privacy
-            </h2>
             <p className="mb-4">
-              Our services are intended for individuals who are at least 18 years
-              of age or have obtained parental/guardian consent. We do not
+              Our services are intended for individuals who are at least 18
+              years of age or have obtained parental/guardian consent. We do not
               knowingly collect personal information from children under 18
               without verifiable parental consent.
             </p>
             <p className="mb-4">
-              If we become aware that we have collected personal information from
-              a child under 18 without proper consent, we will take immediate
-              steps to delete such information from our records. If you believe
-              we have inadvertently collected information from a minor, please
-              contact us immediately at <strong>support@wallearena.com</strong>.
+              If we become aware that we have collected personal information
+              from a child under 18 without proper consent, we will take
+              immediate steps to delete such information from our records. If
+              you believe we have inadvertently collected information from a
+              minor, please contact us immediately at{" "}
+              <strong>support@wallearena.com</strong>.
             </p>
           </section>
 
@@ -539,7 +530,7 @@ export default function PrivacyPolicy() {
               Grievance Officer to address your concerns regarding privacy, data
               protection, and any grievances related to our services.
             </p>
-            
+
             <div className="bg-white border border-red-200 p-5 rounded mb-4">
               <h3 className="text-xl font-semibold mb-3">
                 Grievance Officer Contact Details:
@@ -583,11 +574,12 @@ export default function PrivacyPolicy() {
               </div>
             </div>
 
-            <h3 className="text-lg font-semibold mb-2">How to File a Complaint:</h3>
+            <h3 className="text-lg font-semibold mb-2">
+              How to File a Complaint:
+            </h3>
             <ol className="list-decimal pl-6 mb-4 space-y-2">
               <li>
-                Send an email to{" "}
-                <strong>grievance@wallearena.com</strong> with:
+                Send an email to <strong>grievance@wallearena.com</strong> with:
                 <ul className="list-disc pl-6 mt-2 space-y-1">
                   <li>Your full name and contact information</li>
                   <li>Player ID or Registration ID (if applicable)</li>
@@ -609,8 +601,8 @@ export default function PrivacyPolicy() {
             <div className="bg-yellow-50 border border-yellow-300 p-4 rounded mb-4">
               <ul className="list-disc pl-6 space-y-2">
                 <li>
-                  <strong>Acknowledgment:</strong> We will acknowledge receipt of
-                  your complaint within <strong>48 hours</strong> (2 working
+                  <strong>Acknowledgment:</strong> We will acknowledge receipt
+                  of your complaint within <strong>48 hours</strong> (2 working
                   days) via email
                 </li>
                 <li>
@@ -625,8 +617,8 @@ export default function PrivacyPolicy() {
                   inform you accordingly
                 </li>
                 <li>
-                  <strong>Response:</strong> You will receive a detailed response
-                  via email explaining the resolution or actions taken
+                  <strong>Response:</strong> You will receive a detailed
+                  response via email explaining the resolution or actions taken
                 </li>
               </ul>
             </div>
@@ -643,16 +635,12 @@ export default function PrivacyPolicy() {
             <h2 className="text-2xl font-semibold mb-4">
               13. International Data Transfer
             </h2>
-          <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">
-              13. International Data Transfer
-            </h2>
             <p className="mb-4">
               Your personal information may be transferred to, stored, and
-              processed in countries other than India where our service providers
-              (such as cloud hosting providers) maintain data centers. These
-              countries may have data protection laws that differ from Indian
-              laws.
+              processed in countries other than India where our service
+              providers (such as cloud hosting providers) maintain data centers.
+              These countries may have data protection laws that differ from
+              Indian laws.
             </p>
             <p className="mb-4">
               When we transfer your data internationally, we ensure that:
@@ -673,7 +661,8 @@ export default function PrivacyPolicy() {
             </ul>
             <p className="mb-4">
               By using our services, you consent to the transfer of your
-              information to countries outside India as described in this policy.
+              information to countries outside India as described in this
+              policy.
             </p>
           </section>
 
@@ -682,8 +671,8 @@ export default function PrivacyPolicy() {
               14. Changes to This Privacy Policy
             </h2>
             <p className="mb-4">
-              We reserve the right to update or modify this Privacy Policy at any
-              time to reflect changes in our practices, technology, legal
+              We reserve the right to update or modify this Privacy Policy at
+              any time to reflect changes in our practices, technology, legal
               requirements, or business operations. When we make changes, we
               will:
             </p>
@@ -702,10 +691,10 @@ export default function PrivacyPolicy() {
               </li>
             </ul>
             <p className="mb-4">
-              We encourage you to review this Privacy Policy periodically to stay
-              informed about how we protect your information. Your continued use
-              of our services after changes are posted constitutes acceptance of
-              the updated policy.
+              We encourage you to review this Privacy Policy periodically to
+              stay informed about how we protect your information. Your
+              continued use of our services after changes are posted constitutes
+              acceptance of the updated policy.
             </p>
           </section>
 
@@ -714,7 +703,8 @@ export default function PrivacyPolicy() {
             <p className="mb-4">
               If you have questions about this Privacy Policy, your personal
               information, or our privacy practices (excluding grievances, which
-              should be directed to the Grievance Officer), please contact us at:
+              should be directed to the Grievance Officer), please contact us
+              at:
             </p>
             <div className="bg-gray-100 p-4 rounded mb-4">
               <p>
@@ -756,8 +746,6 @@ export default function PrivacyPolicy() {
             </p>
           </section>
 
-          <section>
-            <h2 className="text-2xl font-semibold mb-4">16. Your Consent</h2>
           <section>
             <h2 className="text-2xl font-semibold mb-4">16. Your Consent</h2>
             <p className="mb-4">

@@ -23,9 +23,9 @@ export default function TermsOfService() {
             </p>
             <p className="mb-4">
               By accessing and using this website and services operated by Walle
-              Arena, you acknowledge that you have read, understood, and agree to
-              be bound by these Terms of Service and our Privacy Policy. If you
-              do not agree to these terms, please do not use this service.
+              Arena, you acknowledge that you have read, understood, and agree
+              to be bound by these Terms of Service and our Privacy Policy. If
+              you do not agree to these terms, please do not use this service.
             </p>
           </section>
 
@@ -63,7 +63,9 @@ export default function TermsOfService() {
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">3. Account Security and Responsibility</h2>
+            <h2 className="text-2xl font-semibold mb-4">
+              3. Account Security and Responsibility
+            </h2>
             <p className="mb-4">
               When you register for our service, you agree to:
             </p>
@@ -114,8 +116,8 @@ export default function TermsOfService() {
                 fee to your chosen payment method through Razorpay
               </li>
               <li>
-                Walle Arena does not store or have access to your complete credit
-                card, debit card, or net banking credentials
+                Walle Arena does not store or have access to your complete
+                credit card, debit card, or net banking credentials
               </li>
               <li>
                 Payment information is encrypted and processed securely by
@@ -133,8 +135,8 @@ export default function TermsOfService() {
             <p className="mb-4">
               <strong>Refund Policy:</strong> All payments are subject to our
               Refund and Return Policy. Please refer to our dedicated Refund
-              Policy page for detailed information on eligibility, timelines, and
-              procedures.
+              Policy page for detailed information on eligibility, timelines,
+              and procedures.
             </p>
           </section>
 
@@ -143,8 +145,8 @@ export default function TermsOfService() {
               5. Prohibited Activities and Restricted Categories
             </h2>
             <p className="mb-4">
-              In compliance with Razorpay&apos;s acceptable use policy and Indian
-              law, you agree not to use this service for any unlawful or
+              In compliance with Razorpay&apos;s acceptable use policy and
+              Indian law, you agree not to use this service for any unlawful or
               prohibited purposes, including but not limited to:
             </p>
             <ul className="list-disc pl-6 mb-4 space-y-2">
@@ -153,15 +155,16 @@ export default function TermsOfService() {
                 registration
               </li>
               <li>
-                Engaging in fraudulent activities, identity theft, or impersonation
+                Engaging in fraudulent activities, identity theft, or
+                impersonation
               </li>
               <li>
                 Uploading viruses, malware, or any malicious code that may harm
                 our systems
               </li>
               <li>
-                Attempting to gain unauthorized access to our servers, databases,
-                or networks
+                Attempting to gain unauthorized access to our servers,
+                databases, or networks
               </li>
               <li>
                 Interfering with or disrupting the website&apos;s proper
@@ -172,38 +175,38 @@ export default function TermsOfService() {
                 service without authorization
               </li>
               <li>
-                Engaging in any activity that violates Indian laws, including the
-                IT Act, 2000, Indian Penal Code, 1860, or Consumer Protection
-                Act, 2019
+                Engaging in any activity that violates Indian laws, including
+                the IT Act, 2000, Indian Penal Code, 1860, or Consumer
+                Protection Act, 2019
               </li>
               <li>
                 Attempting to bypass payment systems or manipulate transaction
                 records
               </li>
-              <li>
-                Submitting counterfeit documents or forged identification
-              </li>
+              <li>Submitting counterfeit documents or forged identification</li>
               <li>
                 Harassing, threatening, or abusing other users or Walle Arena
                 staff
               </li>
             </ul>
             <p className="mb-4">
-              Violation of these prohibitions may result in immediate termination
-              of your account, forfeiture of registration fees, and potential
-              legal action.
+              Violation of these prohibitions may result in immediate
+              termination of your account, forfeiture of registration fees, and
+              potential legal action.
             </p>
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">6. Intellectual Property Rights</h2>
+            <h2 className="text-2xl font-semibold mb-4">
+              6. Intellectual Property Rights
+            </h2>
             <p className="mb-4">
               All content on this website, including but not limited to text,
               graphics, logos, images, photographs, videos, audio clips, digital
               downloads, data compilations, and software, is the property of
               Walle Arena or its licensors and is protected by Indian and
-              international copyright, trademark, and other intellectual property
-              laws.
+              international copyright, trademark, and other intellectual
+              property laws.
             </p>
             <ul className="list-disc pl-6 mb-4 space-y-2">
               <li>
@@ -223,10 +226,13 @@ export default function TermsOfService() {
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">7. User Content and License</h2>
+            <h2 className="text-2xl font-semibold mb-4">
+              7. User Content and License
+            </h2>
             <p className="mb-4">
               When you upload content to our platform (including photos,
-              documents, and personal information), you represent and warrant that:
+              documents, and personal information), you represent and warrant
+              that:
             </p>
             <ul className="list-disc pl-6 mb-4 space-y-2">
               <li>
@@ -291,7 +297,9 @@ export default function TermsOfService() {
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">8. Website Use License</h2>
+            <h2 className="text-2xl font-semibold mb-4">
+              8. Website Use License
+            </h2>
             <p className="mb-4">
               Permission is granted to temporarily access and use this website
               for personal, non-commercial purposes related to tournament
@@ -299,7 +307,9 @@ export default function TermsOfService() {
               title. Under this license, you may not:
             </p>
             <ul className="list-disc pl-6 mb-4 space-y-2">
-              <li>Modify, copy, or reproduce website materials for commercial use</li>
+              <li>
+                Modify, copy, or reproduce website materials for commercial use
+              </li>
               <li>
                 Use the materials for any commercial purpose or public display
                 without authorization
@@ -332,9 +342,9 @@ export default function TermsOfService() {
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">9. Disclaimer of Warranties</h2>
-          <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">9. Disclaimer of Warranties</h2>
+            <h2 className="text-2xl font-semibold mb-4">
+              9. Disclaimer of Warranties
+            </h2>
             <p className="mb-4">
               The materials and services on Walle Arena&apos;s website are
               provided on an &apos;as is&apos; and &apos;as available&apos;
@@ -344,22 +354,21 @@ export default function TermsOfService() {
             </p>
             <ul className="list-disc pl-6 mb-4 space-y-2">
               <li>
-                Implied warranties of merchantability or fitness for a particular
-                purpose
+                Implied warranties of merchantability or fitness for a
+                particular purpose
               </li>
               <li>
-                Non-infringement of intellectual property or violation of third-party
-                rights
+                Non-infringement of intellectual property or violation of
+                third-party rights
               </li>
               <li>
-                Accuracy, completeness, reliability, or timeliness of information
+                Accuracy, completeness, reliability, or timeliness of
+                information
               </li>
               <li>
                 Uninterrupted, secure, or error-free operation of the website
               </li>
-              <li>
-                Freedom from viruses or other harmful components
-              </li>
+              <li>Freedom from viruses or other harmful components</li>
             </ul>
             <p className="mb-4">
               To the fullest extent permitted by law, Walle Arena does not
@@ -369,9 +378,9 @@ export default function TermsOfService() {
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">10. Limitation of Liability</h2>
-          <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">10. Limitation of Liability</h2>
+            <h2 className="text-2xl font-semibold mb-4">
+              10. Limitation of Liability
+            </h2>
             <p className="mb-4">
               To the maximum extent permitted by applicable law, in no event
               shall Walle Arena, its officers, directors, employees, agents,
@@ -390,14 +399,11 @@ export default function TermsOfService() {
                 Damages arising from your use or inability to use the service
               </li>
               <li>
-                Unauthorized access to or alteration of your transmissions or data
+                Unauthorized access to or alteration of your transmissions or
+                data
               </li>
-              <li>
-                Statements or conduct of any third party on the service
-              </li>
-              <li>
-                Any other matter relating to the service
-              </li>
+              <li>Statements or conduct of any third party on the service</li>
+              <li>Any other matter relating to the service</li>
             </ul>
             <p className="mb-4">
               This limitation applies whether the alleged liability is based on
@@ -416,16 +422,12 @@ export default function TermsOfService() {
             <h2 className="text-2xl font-semibold mb-4">
               11. Accuracy of Materials and Information
             </h2>
-          <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">
-              11. Accuracy of Materials and Information
-            </h2>
             <p className="mb-4">
-              While we strive to provide accurate and up-to-date information, the
-              materials appearing on Walle Arena&apos;s website may include
-              technical, typographical, or photographic errors. We do not warrant
-              that any materials on the website are accurate, complete, or
-              current.
+              While we strive to provide accurate and up-to-date information,
+              the materials appearing on Walle Arena&apos;s website may include
+              technical, typographical, or photographic errors. We do not
+              warrant that any materials on the website are accurate, complete,
+              or current.
             </p>
             <p className="mb-4">
               Walle Arena may make changes to the materials, information,
@@ -436,9 +438,9 @@ export default function TermsOfService() {
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">12. Third-Party Links</h2>
-          <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">12. Third-Party Links</h2>
+            <h2 className="text-2xl font-semibold mb-4">
+              12. Third-Party Links
+            </h2>
             <p className="mb-4">
               Our website may contain links to third-party websites or services
               (such as Razorpay payment gateway, Cloudinary file storage) that
@@ -451,24 +453,26 @@ export default function TermsOfService() {
               these entities/individuals or their websites.
             </p>
             <p className="mb-4">
-              You acknowledge and agree that Walle Arena shall not be responsible
-              or liable, directly or indirectly, for any damage or loss caused or
-              alleged to be caused by or in connection with the use of any
-              third-party content, goods, or services available through such
-              websites.
+              You acknowledge and agree that Walle Arena shall not be
+              responsible or liable, directly or indirectly, for any damage or
+              loss caused or alleged to be caused by or in connection with the
+              use of any third-party content, goods, or services available
+              through such websites.
             </p>
             <p className="mb-4">
-              We strongly advise you to read the terms and conditions and privacy
-              policies of any third-party websites or services that you visit.
+              We strongly advise you to read the terms and conditions and
+              privacy policies of any third-party websites or services that you
+              visit.
             </p>
           </section>
 
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">13. Termination</h2>
             <p className="mb-4">
-              We reserve the right to terminate or suspend your account and access
-              to the service immediately, without prior notice or liability, for
-              any reason whatsoever, including but not limited to:
+              We reserve the right to terminate or suspend your account and
+              access to the service immediately, without prior notice or
+              liability, for any reason whatsoever, including but not limited
+              to:
             </p>
             <ul className="list-disc pl-6 mb-4 space-y-2">
               <li>Breach of these Terms of Service</li>
@@ -481,9 +485,9 @@ export default function TermsOfService() {
             <p className="mb-4">
               Upon termination, your right to use the service will immediately
               cease. Sections of these Terms that by their nature should survive
-              termination (including but not limited to disclaimer of warranties,
-              limitation of liability, and governing law) shall survive
-              termination.
+              termination (including but not limited to disclaimer of
+              warranties, limitation of liability, and governing law) shall
+              survive termination.
             </p>
           </section>
 
@@ -506,25 +510,26 @@ export default function TermsOfService() {
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">15. Dispute Resolution and Governing Law</h2>
-          <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">15. Dispute Resolution and Governing Law</h2>
+            <h2 className="text-2xl font-semibold mb-4">
+              15. Dispute Resolution and Governing Law
+            </h2>
             <p className="mb-4">
               These Terms of Service and any disputes arising out of or related
-              to the use of this website or our services shall be governed by and
-              construed in accordance with the laws of India, without regard to
-              conflict of law principles.
+              to the use of this website or our services shall be governed by
+              and construed in accordance with the laws of India, without regard
+              to conflict of law principles.
             </p>
             <p className="mb-4">
               In the event of any dispute, claim, or controversy arising out of
-              or relating to these Terms or the breach, termination, enforcement,
-              interpretation, or validity thereof, the parties shall first
-              attempt to resolve the dispute through good-faith negotiations.
+              or relating to these Terms or the breach, termination,
+              enforcement, interpretation, or validity thereof, the parties
+              shall first attempt to resolve the dispute through good-faith
+              negotiations.
             </p>
             <p className="mb-4">
               If the dispute cannot be resolved through negotiation within 30
-              days, the dispute shall be subject to the exclusive jurisdiction of
-              the courts located in [City, State], India.
+              days, the dispute shall be subject to the exclusive jurisdiction
+              of the courts located in [City, State], India.
             </p>
             <p className="mb-4">
               Nothing in this section shall prevent either party from seeking
@@ -535,13 +540,15 @@ export default function TermsOfService() {
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">16. Modifications to Terms</h2>
+            <h2 className="text-2xl font-semibold mb-4">
+              16. Modifications to Terms
+            </h2>
             <p className="mb-4">
               Walle Arena reserves the right to modify, update, or replace these
-              Terms of Service at any time at our sole discretion. We will notify
-              users of material changes by posting the updated Terms on our
-              website and updating the &quot;Last updated&quot; date at the top
-              of this page.
+              Terms of Service at any time at our sole discretion. We will
+              notify users of material changes by posting the updated Terms on
+              our website and updating the &quot;Last updated&quot; date at the
+              top of this page.
             </p>
             <p className="mb-4">
               Your continued use of the service after any changes to these Terms
@@ -557,8 +564,6 @@ export default function TermsOfService() {
 
           <section className="mb-8">
             <h2 className="text-2xl font-semibold mb-4">17. Severability</h2>
-          <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">17. Severability</h2>
             <p className="mb-4">
               If any provision of these Terms is held to be invalid, illegal, or
               unenforceable by a court of competent jurisdiction, the remaining
@@ -569,14 +574,16 @@ export default function TermsOfService() {
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">18. Entire Agreement</h2>
+            <h2 className="text-2xl font-semibold mb-4">
+              18. Entire Agreement
+            </h2>
             <p className="mb-4">
               These Terms of Service, together with our Privacy Policy, Refund
-              and Return Policy, and Cancellation and Shipping Policy, constitute
-              the entire agreement between you and Walle Arena regarding the use
-              of our website and services, superseding any prior agreements
-              between you and Walle Arena (including, but not limited to, any
-              prior versions of the Terms of Service).
+              and Return Policy, and Cancellation and Shipping Policy,
+              constitute the entire agreement between you and Walle Arena
+              regarding the use of our website and services, superseding any
+              prior agreements between you and Walle Arena (including, but not
+              limited to, any prior versions of the Terms of Service).
             </p>
           </section>
 
@@ -591,7 +598,9 @@ export default function TermsOfService() {
           </section>
 
           <section className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4">20. Contact Information</h2>
+            <h2 className="text-2xl font-semibold mb-4">
+              20. Contact Information
+            </h2>
             <p className="mb-4">
               If you have any questions, concerns, or feedback about these Terms
               of Service, please contact us at:
