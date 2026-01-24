@@ -31,11 +31,13 @@ export function RulesNotice({ className }: RulesNoticeProps) {
             Registration does not confirm participation.
           </span>{" "}
           Limited player slots available.
-        </li>
-        <li>
-          Player registration fee is{" "}
-          <span className="italic font-semibold">Rs.12,500/-</span>. Payment
-          will be collected online only.
+          <li>
+            Player registration fee is{" "}
+            <span className="italic font-semibold">Rs.15,000/-</span>. Payment
+            will be collected online only. Please ensure to confirm your slot by
+            making the correct payment and uploading the corresponding details.
+            Any discrepancies can nullify the registration.
+          </li>
         </li>
         <li>
           Only owners, partners, directors (no top management) of jewellers or
@@ -49,7 +51,7 @@ export function RulesNotice({ className }: RulesNoticeProps) {
         </li>
         <li>
           Players are requested to participate only if they are available for
-          practise sessions and during tournament dates i.e. 6-7-8-9 March 2025.
+          practise sessions and during tournament dates i.e. 5-6-7-8 March 2026.
         </li>
       </ol>
 
@@ -60,13 +62,10 @@ export function RulesNotice({ className }: RulesNoticeProps) {
           Tournament Schedule:
         </p>
         <p className="font-semibold italic text-red-700 dark:text-red-300">
-          4 February Player's Screening (Mumbai)
+          29th January (6pm onwards) Player's Screening (Central Railway Ground)
         </p>
         <p className="font-semibold italic text-red-700 dark:text-red-300">
-          15-16 February Player's Auction and Launch Party (Khamshet)
-        </p>
-        <p className="font-semibold italic text-red-700 dark:text-red-300">
-          6-7-8-9 March Tournament (Mumbai)
+          5-6-7-8 March Main Tournament (Mumbai)
         </p>
       </div>
     </section>

@@ -52,7 +52,6 @@ export function RegistrationForm() {
   const form = useForm<PlayerFormValues>({
     mode: "onChange",
     defaultValues: {
-      played_before: "",
       first_name: "",
       last_name: "",
       email: "",
@@ -93,7 +92,6 @@ export function RegistrationForm() {
     const values = form.getValues();
 
     const missing = [] as string[];
-    if (!values.played_before) missing.push("Played before");
     if (!values.first_name) missing.push("First name");
     if (!values.last_name) missing.push("Last name");
     if (!values.email) missing.push("Email");
@@ -125,7 +123,6 @@ export function RegistrationForm() {
       // Validate all required fields before saving to DB
       const missing = [] as string[];
       // Personal
-      if (!values.played_before) missing.push("Played before");
       if (!values.first_name) missing.push("First name");
       if (!values.last_name) missing.push("Last name");
       if (!values.email) missing.push("Email");
@@ -292,7 +289,7 @@ export function RegistrationForm() {
       const result = await verifyPayment({ player_id: playerId, ...payload });
       setStatusMessage({ kind: "success", text: result.message });
       setPaymentStatus("paid");
-      setStepIndex(2);
+      setStepIndex(steps.length - 1);
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Payment verification failed";
@@ -318,7 +315,6 @@ export function RegistrationForm() {
 
     if (currentStepId === "details") {
       return (
-        values.played_before &&
         values.first_name &&
         values.last_name &&
         values.email &&
@@ -370,54 +366,6 @@ export function RegistrationForm() {
           {currentStepId === "details" && (
             <div className="space-y-6">
               <RulesNotice />
-              <FormField
-                control={form.control}
-                name="played_before"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-base font-semibold">
-                      Have you played at JYPL before?
-                    </FormLabel>
-                    <FormControl>
-                      <div className="flex gap-6">
-                        <div className="flex items-center gap-3">
-                          <input
-                            type="radio"
-                            id="yes"
-                            value="yes"
-                            checked={field.value === "yes"}
-                            onChange={() => field.onChange("yes")}
-                            className="h-5 w-5 cursor-pointer border-2 border-slate-300 accent-blue-600 dark:border-slate-600"
-                          />
-                          <label
-                            htmlFor="yes"
-                            className="cursor-pointer text-slate-700 dark:text-slate-300"
-                          >
-                            Yes
-                          </label>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <input
-                            type="radio"
-                            id="no"
-                            value="no"
-                            checked={field.value === "no"}
-                            onChange={() => field.onChange("no")}
-                            className="h-5 w-5 cursor-pointer border-2 border-slate-300 accent-blue-600 dark:border-slate-600"
-                          />
-                          <label
-                            htmlFor="no"
-                            className="cursor-pointer text-slate-700 dark:text-slate-300"
-                          >
-                            No
-                          </label>
-                        </div>
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <FormField
@@ -986,7 +934,7 @@ export function RegistrationForm() {
                     </p>
                     <p className="mt-1 text-3xl font-bold text-blue-900 dark:text-white">
                       ₹
-                      {order ? (order.amount / 100).toLocaleString() : "12,500"}
+                      {order ? (order.amount / 100).toLocaleString() : "15,000"}
                     </p>
                   </div>
                 </div>

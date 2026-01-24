@@ -24,7 +24,7 @@ class Settings(BaseSettings):
 	razorpay_key_secret: str = Field(..., alias="RAZORPAY_KEY_SECRET")
 	razorpay_webhook_secret: str | None = Field(default=None, alias="RAZORPAY_WEBHOOK_SECRET")
 
-	registration_fee_inr: int = Field(default=12500, alias="REGISTRATION_FEE_INR")
+	registration_fee_inr: int = Field(default=15000, alias="REGISTRATION_FEE_INR")
 
 	storage_mode: Literal["local", "s3", "cloudinary"] = Field(default="local", alias="STORAGE_MODE")
 	s3_bucket: str | None = Field(default=None, alias="S3_BUCKET")

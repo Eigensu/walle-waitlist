@@ -555,14 +555,6 @@ export default function AdminDashboard() {
                       {selectedPlayer.residential_area}
                     </p>
                   </div>
-                  <div>
-                    <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
-                      Played Before
-                    </p>
-                    <p className="mt-1 text-slate-900 dark:text-white capitalize">
-                      {selectedPlayer.played_before || "—"}
-                    </p>
-                  </div>
                 </div>
               </div>
 

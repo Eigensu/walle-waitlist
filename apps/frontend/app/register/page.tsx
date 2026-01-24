@@ -55,19 +55,11 @@ export default function RegisterPage() {
 
             {/* Compact title section */}
             <div className="space-y-1 sm:space-y-1.5">
-              <div className="inline-flex items-center gap-1.5 rounded-full bg-yellow-400/90 px-3 py-0.5 shadow-sm">
-                <span className="text-[10px] font-bold text-blue-900 sm:text-xs">
-                  🏏
-                </span>
-                <span className="text-[10px] font-extrabold uppercase tracking-wide text-blue-900 sm:text-xs">
-                  Season 9 • 2025
-                </span>
-              </div>
               <h1 className="text-xl font-extrabold leading-tight tracking-tight text-white drop-shadow-md sm:text-2xl">
-                Jewellers Youth Premier League
+                Player Registration Portal
               </h1>
               <p className="text-[11px] font-medium text-blue-100 sm:text-xs">
-                Player Registration Portal
+                Walle Arena
               </p>
             </div>
           </div>

@@ -29,7 +29,6 @@ const fileSchema = (allowed: readonly string[]) =>
 // Extremely permissive schema so UI validation controls the flow; prevents RHF
 // resolver from blocking submit when any optional field is empty.
 export const playerSchema = z.object({
-  played_before: z.string(),
   first_name: z.string(),
   last_name: z.string(),
   email: z.string(),
