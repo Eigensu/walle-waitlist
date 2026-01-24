@@ -21,6 +21,7 @@ class AdminLoginResponse(BaseModel):
 
 class PlayerResponse(BaseModel):
     id: str
+    # Personal Details
     first_name: str
     last_name: str
     email: str
@@ -28,6 +29,18 @@ class PlayerResponse(BaseModel):
     residential_area: str
     firm_name: str
     designation: str
+    # Cricket Details
+    batting_type: str
+    bowling_type: str
+    wicket_keeper: str
+    # Jersey Details
+    name_on_jersey: str
+    tshirt_size: str
+    waist_size: int
+    # JYPL Season 7 Details
+    played_jypl_s7: str
+    jypl_s7_team: str
+    # Registration & Payment
     registration_status: str
     payment_status: str | None
     created_at: str | None
@@ -94,6 +107,14 @@ async def get_all_players(
                 residential_area=player.residential_area,
                 firm_name=player.firm_name,
                 designation=player.designation,
+                batting_type=player.batting_type,
+                bowling_type=player.bowling_type,
+                wicket_keeper=player.wicket_keeper,
+                name_on_jersey=player.name_on_jersey,
+                tshirt_size=player.tshirt_size,
+                waist_size=player.waist_size,
+                played_jypl_s7=player.played_jypl_s7,
+                jypl_s7_team=player.jypl_s7_team,
                 registration_status=player.registration_status.value,
                 payment_status=payment.status.value if payment else None,
                 created_at=player.created_at.isoformat() if player.created_at else None,
@@ -135,6 +156,14 @@ async def export_players_csv(
         "Residential Area",
         "Firm/Company",
         "Designation",
+        "Batting Type",
+        "Bowling Type",
+        "Wicket Keeper",
+        "Name on Jersey",
+        "T-Shirt Size",
+        "Waist Size",
+        "Played JYPL S7",
+        "JYPL S7 Team",
         "Registration Status",
         "Payment Status",
         "Created At"
@@ -155,6 +184,14 @@ async def export_players_csv(
             player.residential_area,
             player.firm_name,
             player.designation,
+            player.batting_type,
+            player.bowling_type,
+            player.wicket_keeper,
+            player.name_on_jersey,
+            player.tshirt_size,
+            player.waist_size,
+            player.played_jypl_s7,
+            player.jypl_s7_team,
             player.registration_status.value,
             payment.status.value if payment else "N/A",
             player.created_at.isoformat() if player.created_at else "",

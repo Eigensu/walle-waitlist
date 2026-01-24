@@ -26,6 +26,7 @@ async def get_storage(request: Request) -> StorageService:
 
 @router.post("/register", response_model=RegisterResponse)
 async def register_player(
+    # Personal Details
     first_name: str = Form(...),
     last_name: str = Form(...),
     email: str = Form(...),
@@ -35,6 +36,17 @@ async def register_player(
     designation: str = Form(...),
     photo: UploadFile = File(...),
     visiting_card: UploadFile = File(...),
+    # Cricket Details
+    batting_type: str = Form(...),
+    bowling_type: str = Form(...),
+    wicket_keeper: str = Form(...),
+    # Jersey Details
+    name_on_jersey: str = Form(...),
+    tshirt_size: str = Form(...),
+    waist_size: int = Form(...),
+    # JYPL Season 7 Details
+    played_jypl_s7: str = Form(...),
+    jypl_s7_team: str = Form(default=""),
     storage: StorageService = Depends(get_storage),
 ):
     # Check registration status
@@ -57,6 +69,7 @@ async def register_player(
     card_url = await storage.save_upload(visiting_card, CARD_MIMES, MAX_FILE_BYTES)
 
     player = Player(
+        # Personal Details
         first_name=first_name,
         last_name=last_name,
         email=email,
@@ -66,6 +79,17 @@ async def register_player(
         designation=designation,
         photo_url=photo_url,
         visiting_card_url=card_url,
+        # Cricket Details
+        batting_type=batting_type,
+        bowling_type=bowling_type,
+        wicket_keeper=wicket_keeper,
+        # Jersey Details
+        name_on_jersey=name_on_jersey,
+        tshirt_size=tshirt_size,
+        waist_size=waist_size,
+        # JYPL Season 7 Details
+        played_jypl_s7=played_jypl_s7,
+        jypl_s7_team=jypl_s7_team,
         registration_status=RegistrationStatus.PENDING_PAYMENT,
         created_at=datetime.now(timezone.utc),
     )

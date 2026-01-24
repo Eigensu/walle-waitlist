@@ -17,6 +17,7 @@ def utc_now() -> datetime:
 
 
 class Player(Document):
+    # Personal Details
     first_name: str
     last_name: str
     email: Indexed(EmailStr, unique=True)  # type: ignore[assignment]
@@ -26,6 +27,22 @@ class Player(Document):
     designation: str
     photo_url: str
     visiting_card_url: str
+    
+    # Cricket Details
+    batting_type: str
+    bowling_type: str
+    wicket_keeper: str
+    
+    # Jersey Details
+    name_on_jersey: str
+    tshirt_size: str
+    waist_size: int
+    
+    # JYPL Season 7 Details
+    played_jypl_s7: str
+    jypl_s7_team: str = ""
+    
+    # Registration Status
     registration_status: RegistrationStatus = RegistrationStatus.PENDING_PAYMENT
     created_at: datetime = Field(default_factory=utc_now)
 
