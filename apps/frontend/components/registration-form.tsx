@@ -994,8 +994,7 @@ export function RegistrationForm() {
                     Payment Confirmed!
                   </p>
                   <p className="mt-1 text-green-700 dark:text-white">
-                    Thank you for registering with Walle Arena. Your spot is
-                    confirmed and we&aposve received your payment.
+                    Thank you for registering with Walle Arena your payment for JYPL SEASON 9 is received
                   </p>
                   <p className="mt-3 text-sm text-green-600 dark:text-white">
                     Player ID:{" "}
