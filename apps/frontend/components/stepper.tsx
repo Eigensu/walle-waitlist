@@ -14,18 +14,18 @@ export function Stepper({ steps, activeIndex }: StepperProps) {
   const finishedAll = activeIndex >= steps.length;
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-4 shadow-sm dark:border-slate-700 dark:bg-slate-800/50">
-      {/* Mobile view - vertical stack */}
-      <ol className="flex flex-col gap-3 sm:hidden">
+    <div className="rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-3 shadow-sm dark:border-slate-700 dark:bg-slate-800/50 sm:px-4 sm:py-4">
+      {/* Mobile view - vertical stack, more compact */}
+      <ol className="flex flex-col gap-2 sm:hidden">
         {steps.map((step, index) => {
           const isActive = !finishedAll && index === safeActive;
           const isCompleted =
             index < safeActive || (finishedAll && index === safeActive);
 
           return (
-            <li key={step.id} className="flex items-center gap-3">
+            <li key={step.id} className="flex items-center gap-2.5">
               <div
-                className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-3 text-xs font-bold transition ${
+                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 text-xs font-bold transition ${
                   isCompleted
                     ? "border-blue-100 bg-blue-600 text-white shadow-md shadow-blue-200 dark:border-blue-900 dark:shadow-none"
                     : isActive
@@ -51,14 +51,14 @@ export function Stepper({ steps, activeIndex }: StepperProps) {
                   index + 1
                 )}
               </div>
-              <div className="flex flex-col gap-0">
+              <div className="flex flex-col gap-0 min-w-0">
                 <span
-                  className={`text-xs font-semibold ${isActive || isCompleted ? "text-slate-900 dark:text-white" : "text-slate-500 dark:text-white"}`}
+                  className={`text-xs font-semibold truncate ${isActive || isCompleted ? "text-slate-900 dark:text-white" : "text-slate-500 dark:text-slate-400"}`}
                 >
                   {step.label}
                 </span>
                 {step.helper ? (
-                  <span className="text-xs text-slate-500 dark:text-white">
+                  <span className="text-xs text-slate-500 dark:text-slate-400 truncate">
                     {step.helper}
                   </span>
                 ) : null}

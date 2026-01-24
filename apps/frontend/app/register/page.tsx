@@ -31,33 +31,62 @@ export default function RegisterPage() {
         <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(59,130,246,0.08)_0%,rgba(99,102,241,0.08)_50%,transparent_50%)]" />
       </div>
 
-      <div className="relative mx-auto flex max-w-5xl flex-col gap-8 px-4 py-10 sm:px-8 lg:px-10">
-        <header className="flex flex-col items-center gap-4 text-center">
-          <div className="relative flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 shadow-xl shadow-blue-300/60 ring-4 ring-blue-100 dark:from-blue-700 dark:to-indigo-700 dark:shadow-none dark:ring-blue-900/40">
-            <Image
-              src="/walle-logo.png"
-              alt="Walle Arena"
-              width={48}
-              height={48}
-              className="relative z-10 object-contain brightness-0 invert"
-              priority
-            />
+      <div className="relative mx-auto flex max-w-5xl flex-col gap-2 px-4 py-4 sm:py-8 sm:px-8 lg:px-10">
+        <header className="relative mb-3 overflow-hidden rounded-xl border-2 border-blue-400/60 bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-700 p-3.5 shadow-lg dark:border-blue-700/50 dark:from-blue-800 dark:via-blue-900 dark:to-indigo-950 sm:rounded-2xl sm:p-5">
+          {/* Subtle cricket stitches pattern */}
+          <div className="pointer-events-none absolute right-4 top-4 h-16 w-16 opacity-[0.07] sm:h-20 sm:w-20">
+            <div className="absolute left-1/2 top-0 h-full w-0.5 -translate-x-1/2 bg-white" />
+            <div className="absolute left-1/4 top-0 h-full w-px bg-white" />
+            <div className="absolute right-1/4 top-0 h-full w-px bg-white" />
           </div>
-          <div className="space-y-1">
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl md:text-4xl">
-              Jewellers Youth Premier League — Season 9
-            </h1>
-            <p className="max-w-2xl text-sm text-slate-700 dark:text-slate-300 sm:text-base">
-              Registration Form
-            </p>
+
+          <div className="relative flex flex-col items-center gap-2 text-center sm:gap-3">
+            {/* Compact logo */}
+            <div className="relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-slate-800 to-slate-900 shadow-xl ring-2 ring-yellow-400/40 sm:h-16 sm:w-16">
+              <Image
+                src="/walle-logo.png"
+                alt="Walle Arena"
+                width={56}
+                height={56}
+                className="relative z-10 h-10 w-10 object-contain sm:h-12 sm:w-12"
+                priority
+              />
+            </div>
+
+            {/* Compact title section */}
+            <div className="space-y-1 sm:space-y-1.5">
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-yellow-400/90 px-3 py-0.5 shadow-sm">
+                <span className="text-[10px] font-bold text-blue-900 sm:text-xs">
+                  🏏
+                </span>
+                <span className="text-[10px] font-extrabold uppercase tracking-wide text-blue-900 sm:text-xs">
+                  Season 9 • 2025
+                </span>
+              </div>
+              <h1 className="text-xl font-extrabold leading-tight tracking-tight text-white drop-shadow-md sm:text-2xl">
+                Jewellers Youth Premier League
+              </h1>
+              <p className="text-[11px] font-medium text-blue-100 sm:text-xs">
+                Player Registration Portal
+              </p>
+            </div>
           </div>
-          <div className="mt-4 w-full">
-            <SponsorStrip className="mx-auto max-w-3xl" />
+
+          {/* Vibrant bottom stripe */}
+          <div className="absolute bottom-0 left-0 right-0 flex h-1">
+            <div className="h-full w-1/3 bg-gradient-to-r from-yellow-400 to-green-400" />
+            <div className="h-full w-1/3 bg-green-400" />
+            <div className="h-full w-1/3 bg-gradient-to-r from-green-400 to-yellow-400" />
           </div>
         </header>
 
+        {/* Sponsor strip now outside header */}
+        <div className="mb-2 sm:mb-4">
+          <SponsorStrip className="mx-auto max-w-2xl" />
+        </div>
+
         <Card className="border-2 border-blue-200 bg-white/95 shadow-2xl shadow-blue-100/60 backdrop-blur dark:border-slate-700 dark:bg-slate-800/90 dark:shadow-none">
-          <CardContent className="p-6 sm:p-8 lg:p-10">
+          <CardContent className="p-6 sm:p-8 space-y-3 pt-4 sm:pt-4">
             <RegistrationForm />
             <p className="mt-10 text-center text-xs text-slate-500 dark:text-slate-400">
               By registering, you agree to our{" "}

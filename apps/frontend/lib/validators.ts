@@ -16,19 +16,27 @@ const fileSchema = (allowed: readonly string[]) =>
       `Unsupported file type. Allowed: ${allowed.join(", ")}`
     );
 
+// Extremely permissive schema so UI validation controls the flow; prevents RHF
+// resolver from blocking submit when any optional field is empty.
 export const playerSchema = z.object({
-  first_name: baseString.min(2, "First name must have at least 2 characters"),
-  last_name: baseString.min(2, "Last name must have at least 2 characters"),
-  email: baseString.email("Enter a valid email"),
-  phone: baseString.regex(
-    /^\+?[1-9]\d{1,14}$/,
-    "Enter phone in E.164 format (e.g. +911234567890)"
-  ),
-  residential_area: baseString.min(2, "Residential area is required"),
-  firm_name: baseString.min(2, "Firm name is required"),
-  designation: baseString.min(2, "Designation is required"),
-  photo: fileSchema(PHOTO_MIMES),
-  visiting_card: fileSchema(CARD_MIMES),
+  played_before: z.string(),
+  first_name: z.string(),
+  last_name: z.string(),
+  email: z.string(),
+  phone: z.string(),
+  residential_area: z.string(),
+  firm_name: z.string(),
+  designation: z.string(),
+  batting_type: z.string(),
+  bowling_type: z.string(),
+  wicket_keeper: z.string(),
+  name_on_jersey: z.string(),
+  tshirt_size: z.string(),
+  waist_size: z.number(),
+  played_jypl_s7: z.string(),
+  jypl_s7_team: z.string(),
+  photo: z.instanceof(File).nullable(),
+  visiting_card: z.instanceof(File).nullable(),
 });
 
 export type PlayerFormValues = z.infer<typeof playerSchema>;

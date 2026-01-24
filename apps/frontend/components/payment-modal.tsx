@@ -132,35 +132,35 @@ export function PaymentModal({
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => (!isOpen ? onClose() : null)}>
-      <DialogContent className="border-2 border-blue-200">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-3 text-xl dark:text-white">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-white">
-              <CreditCard className="size-5" />
+      <DialogContent className="border-2 border-blue-200 max-w-sm dark:border-blue-800 dark:bg-slate-900">
+        <DialogHeader className="pb-2">
+          <DialogTitle className="flex items-center gap-2 text-lg text-slate-900 dark:text-white">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 text-white">
+              <CreditCard className="size-4" />
             </div>
-            <span className="text-blue-900 dark:text-white">
+            <span className="text-slate-900 dark:text-white">
               Secure Payment
             </span>
           </DialogTitle>
-          <DialogDescription className="text-blue-600 dark:text-white">
+          <DialogDescription className="text-xs text-slate-600 dark:text-slate-400">
             We use Razorpay for secure payment processing. Your card details are
             never stored on our servers.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
-          <div className="flex items-center justify-between rounded-xl border-2 border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-4">
+        <div className="space-y-3">
+          <div className="flex items-center justify-between rounded-lg border border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 px-3 py-3 dark:border-blue-900/40 dark:from-slate-800 dark:to-slate-800">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-blue-600 dark:text-white">
+              <p className="text-xs font-semibold uppercase tracking-wider text-blue-600 dark:text-blue-300">
                 Total Amount
               </p>
-              <p className="mt-1 text-3xl font-bold text-blue-900 dark:text-white">
+              <p className="mt-1 text-2xl font-bold text-blue-900 dark:text-white">
                 ₹{order ? (order.amount / 100).toLocaleString() : "--"}
               </p>
             </div>
-            <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-blue-600 text-white shadow-lg shadow-blue-300">
+            <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-blue-600 text-white shadow-lg shadow-blue-300 dark:shadow-blue-900/50">
               <svg
-                className="h-8 w-8"
+                className="h-7 w-7"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -175,25 +175,27 @@ export function PaymentModal({
             </div>
           </div>
           {error ? (
-            <div className="flex items-start gap-3 rounded-xl border-2 border-red-200 bg-red-50 px-4 py-3">
-              <AlertCircle className="mt-0.5 size-5 text-red-600" />
-              <span className="text-sm font-medium text-red-900">{error}</span>
+            <div className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 dark:border-red-900/40 dark:bg-red-900/20">
+              <AlertCircle className="mt-0.5 size-4 text-red-600 dark:text-red-400 flex-shrink-0" />
+              <span className="text-xs font-medium text-red-900 dark:text-red-300">
+                {error}
+              </span>
             </div>
           ) : null}
-          <div className="flex items-center gap-2 rounded-xl bg-blue-50 px-3 py-3 text-sm text-blue-700 dark:text-white">
-            <ShieldCheck className="size-5 text-blue-600" />
+          <div className="flex items-center gap-2 rounded-lg bg-blue-50 px-3 py-2 text-xs text-blue-700 dark:bg-blue-900/20 dark:text-blue-300 dark:border dark:border-blue-900/40">
+            <ShieldCheck className="size-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
             <span className="font-medium">
               256-bit SSL encrypted checkout powered by Razorpay
             </span>
           </div>
         </div>
 
-        <DialogFooter className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+        <DialogFooter className="flex flex-col gap-2 pt-2 sm:flex-row sm:justify-end">
           <Button
             type="button"
             variant="outline"
             onClick={onClose}
-            className="border-blue-300 text-blue-700 hover:bg-blue-50 dark:shadow-none"
+            className="border-blue-300 text-blue-700 hover:bg-blue-50 dark:border-blue-800 dark:text-blue-300 dark:hover:bg-blue-900/20 dark:shadow-none h-9 text-sm"
           >
             Cancel
           </Button>
@@ -201,9 +203,9 @@ export function PaymentModal({
             type="button"
             onClick={openCheckout}
             disabled={!order || loadingScript}
-            className="bg-blue-600 text-white hover:bg-blue-700 shadow-md shadow-blue-200 dark:shadow-none"
+            className="bg-blue-600 text-white hover:bg-blue-700 shadow-md shadow-blue-200 dark:shadow-blue-900/50 dark:bg-blue-700 dark:hover:bg-blue-800 h-9 text-sm"
           >
-            {loadingScript ? "Preparing checkout..." : "Pay with Razorpay"}
+            {loadingScript ? "Preparing..." : "Pay with Razorpay"}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef } from "react";
+import { useMemo, useRef, useId } from "react";
 import { UploadCloud } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -27,6 +27,7 @@ export function FileUpload({
   hint,
 }: FileUploadProps) {
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const inputId = useId();
 
   const prettySize = useMemo(() => {
     if (!value) return null;
@@ -37,9 +38,14 @@ export function FileUpload({
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between gap-2">
-        <FormLabel>{label}</FormLabel>
+        <FormLabel htmlFor={inputId}>{label}</FormLabel>
         {hint ? (
-          <span className="text-xs text-muted-foreground">{hint}</span>
+          <span
+            id={`${inputId}-hint`}
+            className="text-xs text-muted-foreground"
+          >
+            {hint}
+          </span>
         ) : null}
       </div>
       <div
@@ -52,16 +58,29 @@ export function FileUpload({
             inputRef.current?.click();
           }
         }}
-        className="flex cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-slate-300 bg-white/80 px-4 py-6 text-center shadow-[0_20px_60px_-35px_rgba(0,0,0,0.4)] transition hover:border-blue-300 hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-200 dark:border-slate-600 dark:bg-slate-700/30 dark:hover:border-blue-500 dark:hover:bg-slate-700/50 dark:focus-visible:ring-blue-900/40"
+        className="relative flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-slate-300 bg-white/80 px-3 py-4 text-center shadow-[0_12px_36px_-24px_rgba(0,0,0,0.35)] transition hover:border-blue-300 hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-200 dark:border-slate-600 dark:bg-slate-700/30 dark:hover:border-blue-500 dark:hover:bg-slate-700/50 dark:focus-visible:ring-blue-900/40 sm:gap-3 sm:rounded-xl sm:px-4 sm:py-6"
       >
-        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400">
-          <UploadCloud className="size-7" />
+        {/* Full-surface input overlay for mobile accessibility */}
+        <Input
+          id={inputId}
+          ref={inputRef}
+          type="file"
+          accept={accept}
+          aria-describedby={hint ? `${inputId}-hint` : undefined}
+          onChange={(event) => {
+            const file = event.target.files?.[0];
+            onChange(file ?? null);
+          }}
+          className="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
+        />
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-50 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400 sm:h-14 sm:w-14">
+          <UploadCloud className="size-6 sm:size-7" />
         </div>
         <div className="space-y-1">
-          <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+          <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 sm:text-base">
             Drop your file here, or click to browse
           </p>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
+          <p className="text-xs text-slate-500 dark:text-slate-400 sm:text-sm">
             {description ?? "JPEG, PNG, WebP, or PDF (max 5MB)"}
           </p>
         </div>
@@ -78,21 +97,11 @@ export function FileUpload({
           type="button"
           variant="outline"
           size="sm"
-          className="border-blue-200 bg-white text-blue-700 hover:bg-blue-50 dark:border-slate-600 dark:bg-slate-700 dark:text-blue-400 dark:hover:bg-slate-600"
+          className="z-0 border-blue-200 bg-white text-blue-700 hover:bg-blue-50 dark:border-slate-600 dark:bg-slate-700 dark:text-blue-400 dark:hover:bg-slate-600"
           onClick={() => inputRef.current?.click()}
         >
           Upload file
         </Button>
-        <Input
-          ref={inputRef}
-          type="file"
-          className="hidden"
-          accept={accept}
-          onChange={(event) => {
-            const file = event.target.files?.[0];
-            onChange(file ?? null);
-          }}
-        />
         {error ? (
           <FormMessage className="mt-1 text-sm">{error}</FormMessage>
         ) : null}
