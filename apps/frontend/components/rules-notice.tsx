@@ -31,13 +31,13 @@ export function RulesNotice({ className }: RulesNoticeProps) {
             Registration does not confirm participation.
           </span>{" "}
           Limited player slots available.
-          <li>
-            Player registration fee is{" "}
-            <span className="italic font-semibold">Rs.15,000/-</span>. Payment
-            will be collected online only. Please ensure to confirm your slot by
-            making the correct payment and uploading the corresponding details.
-            Any discrepancies can nullify the registration.
-          </li>
+        </li>
+        <li>
+          Player registration fee is{" "}
+          <span className="italic font-semibold">Rs.15,000/-</span>. Payment
+          will be collected online only. Please ensure to confirm your slot by
+          making the correct payment and uploading the corresponding details.
+          Any discrepancies can nullify the registration.
         </li>
         <li>
           Only owners, partners, directors (no top management) of jewellers or

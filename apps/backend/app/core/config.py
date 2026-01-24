@@ -18,7 +18,7 @@ load_dotenv(ROOT_ENV_PATH, override=False)
 class Settings(BaseSettings):
 	mongo_url: str = Field(..., alias="MONGO_URL")
 	mongo_db: str = Field(..., alias="MONGO_DB")
-	cors_origins: str = Field(default="", alias="CORS_ORIGINS")
+	cors_origins: list[str] = Field(default_factory=list, alias="CORS_ORIGINS")
 
 	razorpay_key_id: str = Field(..., alias="RAZORPAY_KEY_ID")
 	razorpay_key_secret: str = Field(..., alias="RAZORPAY_KEY_SECRET")
@@ -46,10 +46,12 @@ class Settings(BaseSettings):
 		extra="ignore",
 	)
 
-	@field_validator("cors_origins", mode="after")
+	@field_validator("cors_origins", mode="before")
 	@classmethod
-	def parse_cors_origins(cls, value: str) -> list[str]:
+	def parse_cors_origins(cls, value: str | list[str]) -> list[str]:
 		"""Convert comma-separated or JSON-array-like string to list."""
+		if isinstance(value, list):
+			return value
 		if not value:
 			return []
 		value = value.strip()
@@ -68,7 +70,7 @@ class Settings(BaseSettings):
 
 @lru_cache
 def get_settings() -> Settings:
-	return Settings()
+	return Settings()  # type: ignore[call-arg]
 
 
 def env_path() -> str:

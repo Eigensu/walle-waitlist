@@ -1,6 +1,24 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Image from "next/image";
+import { getPublicConfig } from "@/lib/api";
 
 export default function Home() {
+  const [regOpen, setRegOpen] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const cfg = await getPublicConfig();
+        setRegOpen(cfg.registration_open);
+      } catch {
+        // If fetch fails, leave as null to avoid misleading UI
+        setRegOpen(null);
+      }
+    };
+    load();
+  }, []);
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-blue-100/20 to-indigo-100/30 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800 font-sans text-foreground">
       <main className="flex w-full max-w-5xl flex-col gap-12 px-6 py-16 sm:px-12">
@@ -34,10 +52,33 @@ export default function Home() {
 
           <div className="relative flex flex-col gap-6">
             <div className="flex flex-col gap-4">
-              <div className="inline-flex items-center gap-2 self-start rounded-full bg-blue-100 dark:bg-blue-900/40 px-4 py-2">
-                <div className="h-2 w-2 animate-pulse rounded-full bg-blue-600 dark:bg-blue-400"></div>
-                <span className="text-xs font-semibold uppercase tracking-[0.15em] text-blue-900 dark:text-blue-200">
-                  Registration Open
+              <div
+                className={
+                  `inline-flex items-center gap-2 self-start rounded-full px-4 py-2 ` +
+                  (regOpen === false
+                    ? "bg-red-100 dark:bg-red-900/40"
+                    : "bg-blue-100 dark:bg-blue-900/40")
+                }
+              >
+                <div
+                  className={
+                    `h-2 w-2 animate-pulse rounded-full ` +
+                    (regOpen === false
+                      ? "bg-red-600 dark:bg-red-400"
+                      : "bg-blue-600 dark:bg-blue-400")
+                  }
+                ></div>
+                <span
+                  className={
+                    `text-xs font-semibold uppercase tracking-[0.15em] ` +
+                    (regOpen === false
+                      ? "text-red-900 dark:text-red-200"
+                      : "text-blue-900 dark:text-blue-200")
+                  }
+                >
+                  {regOpen === false
+                    ? "Registration Closed"
+                    : "Registration Open"}
                 </span>
               </div>
               <h2 className="text-4xl font-bold leading-tight text-blue-900 dark:text-white sm:text-5xl">

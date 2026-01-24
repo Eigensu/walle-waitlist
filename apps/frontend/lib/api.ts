@@ -15,6 +15,9 @@ export type VerifyPaymentResponse = {
   message: string;
 };
 
+export type PublicConfig = { registration_open: boolean };
+export type AdminConfig = { registration_open: boolean };
+
 async function handleJson<T>(res: Response): Promise<T> {
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
@@ -56,4 +59,29 @@ export async function verifyPayment(payload: {
   });
 
   return handleJson<VerifyPaymentResponse>(res);
+}
+
+export async function getPublicConfig(): Promise<PublicConfig> {
+  const res = await fetch("/api/config");
+  return handleJson<PublicConfig>(res);
+}
+
+export async function adminGetConfig(username: string, password: string): Promise<AdminConfig> {
+  const url = `/api/admin/config?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`;
+  const res = await fetch(url);
+  return handleJson<AdminConfig>(res);
+}
+
+export async function adminUpdateConfig(
+  username: string,
+  password: string,
+  registration_open: boolean,
+): Promise<AdminConfig> {
+  const url = `/api/admin/config?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ registration_open }),
+  });
+  return handleJson<AdminConfig>(res);
 }

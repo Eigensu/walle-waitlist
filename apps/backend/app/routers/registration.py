@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from pymongo.errors import DuplicateKeyError
 
 from app.models.player import Player, RegistrationStatus
+from app.models.config import AppConfig
 from app.services.storage import StorageService
 
 router = APIRouter(prefix="/api", tags=["registration"])
@@ -36,6 +37,10 @@ async def register_player(
     visiting_card: UploadFile = File(...),
     storage: StorageService = Depends(get_storage),
 ):
+    # Check registration status
+    cfg = await AppConfig.find_one({})
+    if cfg and not cfg.registration_open:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Registration is currently closed")
     # Duplicate checks
     if await Player.find_one(Player.email == email):
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already registered")
@@ -65,3 +70,17 @@ async def register_player(
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Duplicate email or phone") from exc
 
     return RegisterResponse(player_id=str(player.id), message="Details Saved")
+
+
+class PublicConfigResponse(BaseModel):
+    registration_open: bool
+
+
+@router.get("/config", response_model=PublicConfigResponse)
+async def get_public_config():
+    """Public endpoint: expose registration open/closed status for frontend."""
+    cfg = await AppConfig.find_one({})
+    if cfg is None:
+        # default open
+        return PublicConfigResponse(registration_open=True)
+    return PublicConfigResponse(registration_open=cfg.registration_open)

@@ -4,6 +4,7 @@ from pydantic import BaseModel
 from app.core.config import Settings
 from app.models.player import Player, RegistrationStatus
 from app.models.payment import Payment, PaymentStatus
+from app.models.config import AppConfig
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
 
@@ -166,3 +167,55 @@ async def export_players_csv(
         media_type="text/csv",
         headers={"Content-Disposition": "attachment; filename=players.csv"}
     )
+
+
+class ConfigResponse(BaseModel):
+    registration_open: bool
+
+
+class ConfigUpdateRequest(BaseModel):
+    registration_open: bool
+
+
+@router.get("/config", response_model=ConfigResponse)
+async def get_config(
+    username: str,
+    password: str,
+    settings: Settings = Depends(get_settings),
+):
+    """Get application configuration (requires authentication)."""
+    if not verify_admin_credentials(username, password, settings):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid credentials"
+        )
+
+    cfg = await AppConfig.find_one({})
+    if cfg is None:
+        cfg = AppConfig(registration_open=True)
+        await cfg.insert()
+    return ConfigResponse(registration_open=cfg.registration_open)
+
+
+@router.post("/config", response_model=ConfigResponse)
+async def update_config(
+    payload: ConfigUpdateRequest,
+    username: str,
+    password: str,
+    settings: Settings = Depends(get_settings),
+):
+    """Update application configuration (requires authentication)."""
+    if not verify_admin_credentials(username, password, settings):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid credentials"
+        )
+
+    cfg = await AppConfig.find_one({})
+    if cfg is None:
+        cfg = AppConfig(registration_open=payload.registration_open)
+        await cfg.insert()
+    else:
+        cfg.registration_open = payload.registration_open
+        await cfg.save()
+    return ConfigResponse(registration_open=cfg.registration_open)

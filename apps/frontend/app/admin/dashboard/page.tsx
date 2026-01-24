@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/dialog";
 import { DataGrid, type Column, type SortColumn } from "react-data-grid";
 import "react-data-grid/lib/styles.css";
+import { adminGetConfig, adminUpdateConfig } from "@/lib/api";
 
 interface Player {
   id: string;
@@ -60,6 +61,8 @@ export default function AdminDashboard() {
   const [paymentAmount, setPaymentAmount] = useState<string>("");
   const [paymentUpdating, setPaymentUpdating] = useState(false);
   const [paymentError, setPaymentError] = useState("");
+  const [regOpen, setRegOpen] = useState<boolean | null>(null);
+  const [regUpdating, setRegUpdating] = useState(false);
 
   useEffect(() => {
     const fetchPlayers = async () => {
@@ -99,6 +102,46 @@ export default function AdminDashboard() {
 
     fetchPlayers();
   }, [router]);
+
+  useEffect(() => {
+    const fetchConfig = async () => {
+      try {
+        const credentials = localStorage.getItem("admin_credentials");
+        if (!credentials) {
+          router.push("/admin");
+          return;
+        }
+
+        const [username, password] = atob(credentials).split(":");
+        const config = await adminGetConfig(username, password);
+        setRegOpen(config.registration_open);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to fetch config");
+      }
+    };
+
+    fetchConfig();
+  }, [router]);
+
+  const handleToggleRegistration = async () => {
+    if (regOpen === null) return;
+    setRegUpdating(true);
+    try {
+      const credentials = localStorage.getItem("admin_credentials");
+      if (!credentials) {
+        router.push("/admin");
+        return;
+      }
+
+      const [username, password] = atob(credentials).split(":");
+      const updated = await adminUpdateConfig(username, password, !regOpen);
+      setRegOpen(updated.registration_open);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to update config");
+    } finally {
+      setRegUpdating(false);
+    }
+  };
 
   const filteredPlayers = useMemo(() => {
     if (!searchTerm) return players;
@@ -416,6 +459,45 @@ export default function AdminDashboard() {
               </>
             )}
           </Button>
+          <div className="flex items-center gap-2">
+            {regOpen !== null && (
+              <span
+                className={`inline-block rounded-full px-2 py-1 text-xs font-semibold ${
+                  regOpen
+                    ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                    : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
+                }`}
+              >
+                {regOpen ? "Registration Open" : "Registration Closed"}
+              </span>
+            )}
+            <Button
+              onClick={handleToggleRegistration}
+              disabled={regUpdating || regOpen === null}
+              className={
+                regOpen
+                  ? "bg-red-600 text-white hover:bg-red-700"
+                  : "bg-green-600 text-white hover:bg-green-700"
+              }
+            >
+              {regUpdating ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Updating...
+                </>
+              ) : regOpen ? (
+                <>
+                  <X className="mr-2 h-4 w-4" />
+                  Close Form
+                </>
+              ) : (
+                <>
+                  <Check className="mr-2 h-4 w-4" />
+                  Open Form
+                </>
+              )}
+            </Button>
+          </div>
         </div>
 
         {/* Error Message */}

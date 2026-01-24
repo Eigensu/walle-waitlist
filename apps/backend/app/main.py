@@ -10,6 +10,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from app.core.config import get_settings
 from app.models.payment import Payment
 from app.models.player import Player
+from app.models.config import AppConfig
 from app.routers import payments, registration, admin
 from app.services.razorpay import RazorpayService
 from app.services.storage import build_storage_service
@@ -22,7 +23,7 @@ UPLOADS_DIR = Path(__file__).resolve().parent / "uploads"
 async def lifespan(app: FastAPI):
     client = AsyncIOMotorClient(settings.mongo_url)
     database = client[settings.mongo_db]
-    await init_beanie(database=database, document_models=[Player, Payment])
+    await init_beanie(database=database, document_models=[Player, Payment, AppConfig])
 
     storage = build_storage_service(
         settings.storage_mode, 
@@ -38,6 +39,11 @@ async def lifespan(app: FastAPI):
     app.state.storage = storage
     app.state.settings = settings
     app.state.razorpay = razorpay
+    # Ensure default app config exists
+    cfg = await AppConfig.find_one({})
+    if cfg is None:
+        cfg = AppConfig(registration_open=True)
+        await cfg.insert()
 
     yield
 

@@ -1,13 +1,29 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Image from "next/image";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { RegistrationForm } from "@/components/registration-form";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { SponsorStrip } from "@/components/sponsor-strip";
+import { getPublicConfig } from "@/lib/api";
 
 export default function RegisterPage() {
+  const [regOpen, setRegOpen] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const loadConfig = async () => {
+      try {
+        const cfg = await getPublicConfig();
+        setRegOpen(cfg.registration_open);
+      } catch (e) {
+        // If config fails, default to showing the form to avoid blocking
+        setRegOpen(true);
+      }
+    };
+    loadConfig();
+  }, []);
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-blue-50 via-white to-indigo-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900">
       {/* Theme Toggle Button */}
@@ -62,6 +78,26 @@ export default function RegisterPage() {
                 Walle Arena
               </p>
             </div>
+
+            {/* Registration Status Pill */}
+            {regOpen !== null && (
+              <div
+                className={
+                  `inline-flex items-center gap-2 rounded-full px-3 py-1 text-[10px] sm:text-xs font-semibold uppercase tracking-[0.12em] shadow-sm ` +
+                  (regOpen
+                    ? "bg-green-100/90 text-green-800 dark:bg-green-900/50 dark:text-green-300"
+                    : "bg-red-100/90 text-red-800 dark:bg-red-900/50 dark:text-red-300")
+                }
+              >
+                <div
+                  className={
+                    `h-1.5 w-1.5 animate-pulse rounded-full ` +
+                    (regOpen ? "bg-green-600" : "bg-red-600")
+                  }
+                ></div>
+                {regOpen ? "Registration Open" : "Registration Closed"}
+              </div>
+            )}
           </div>
 
           {/* Vibrant bottom stripe */}
@@ -79,7 +115,18 @@ export default function RegisterPage() {
 
         <Card className="border-2 border-blue-200 bg-white/95 shadow-2xl shadow-blue-100/60 backdrop-blur dark:border-slate-700 dark:bg-slate-800/90 dark:shadow-none">
           <CardContent className="p-6 sm:p-8 space-y-3 pt-4 sm:pt-4">
-            <RegistrationForm />
+            {regOpen === false ? (
+              <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-6 text-center text-slate-800 dark:border-yellow-900/40 dark:bg-yellow-950/20 dark:text-yellow-200">
+                <p className="text-lg font-semibold">
+                  Registration is currently closed
+                </p>
+                <p className="mt-1 text-sm">
+                  Please check back later or contact the organizers for updates.
+                </p>
+              </div>
+            ) : (
+              <RegistrationForm />
+            )}
             <p className="mt-10 text-center text-xs text-slate-500 dark:text-slate-400">
               By registering, you agree to our{" "}
               <a
