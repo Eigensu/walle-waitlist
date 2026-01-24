@@ -68,7 +68,6 @@ export function FileUpload({
           ref={inputRef}
           type="file"
           accept={accept}
-          capture="environment"
           aria-describedby={hint ? `${inputId}-hint` : undefined}
           onChange={(event) => {
             const file = event.target.files?.[0];
