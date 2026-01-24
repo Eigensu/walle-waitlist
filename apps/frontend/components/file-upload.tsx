@@ -3,7 +3,6 @@
 import { useMemo, useRef, useId, useState } from "react";
 import { UploadCloud } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { FormDescription, FormLabel, FormMessage } from "@/components/ui/form";
 
 export type FileUploadProps = {
@@ -144,15 +143,6 @@ export function FileUpload({
             <span>No file selected</span>
           )}
         </div>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="z-0 border-blue-200 bg-white text-blue-700 hover:bg-blue-50 dark:border-slate-600 dark:bg-slate-700 dark:text-blue-400 dark:hover:bg-slate-600"
-          onClick={() => inputRef.current?.click()}
-        >
-          Upload file
-        </Button>
         {error ? (
           <FormMessage className="mt-1 text-sm">{error}</FormMessage>
         ) : localError ? (
