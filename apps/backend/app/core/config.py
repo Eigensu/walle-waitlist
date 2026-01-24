@@ -18,7 +18,7 @@ load_dotenv(ROOT_ENV_PATH, override=False)
 class Settings(BaseSettings):
 	mongo_url: str = Field(..., alias="MONGO_URL")
 	mongo_db: str = Field(..., alias="MONGO_DB")
-	cors_origins: list[str] = Field(default_factory=list, alias="CORS_ORIGINS")
+	cors_origins: str | list[str] = Field(default_factory=list, alias="CORS_ORIGINS")
 
 	razorpay_key_id: str = Field(..., alias="RAZORPAY_KEY_ID")
 	razorpay_key_secret: str = Field(..., alias="RAZORPAY_KEY_SECRET")
