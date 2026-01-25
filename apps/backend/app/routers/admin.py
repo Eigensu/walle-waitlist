@@ -37,7 +37,7 @@ class PlayerResponse(BaseModel):
     name_on_jersey: str
     tshirt_size: str
     waist_size: int
-    # JYPL Season 7 Details
+    # JYPL Season 8 Details
     played_jypl_s7: str
     jypl_s7_team: str
     # Registration & Payment
@@ -162,8 +162,8 @@ async def export_players_csv(
         "Name on Jersey",
         "T-Shirt Size",
         "Waist Size",
-        "Played JYPL S7",
-        "JYPL S7 Team",
+        "Played JYPL S8",
+        "JYPL S8 Team",
         "Registration Status",
         "Payment Status",
         "Created At"

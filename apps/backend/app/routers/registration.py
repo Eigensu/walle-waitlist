@@ -44,7 +44,7 @@ async def register_player(
     name_on_jersey: str = Form(...),
     tshirt_size: str = Form(...),
     waist_size: int = Form(...),
-    # JYPL Season 7 Details
+    # JYPL Season 8 Details
     played_jypl_s7: str = Form(...),
     jypl_s7_team: str = Form(default=""),
     storage: StorageService = Depends(get_storage),
@@ -87,7 +87,7 @@ async def register_player(
         name_on_jersey=name_on_jersey,
         tshirt_size=tshirt_size,
         waist_size=waist_size,
-        # JYPL Season 7 Details
+        # JYPL Season 8 Details
         played_jypl_s7=played_jypl_s7,
         jypl_s7_team=jypl_s7_team,
         registration_status=RegistrationStatus.PENDING_PAYMENT,

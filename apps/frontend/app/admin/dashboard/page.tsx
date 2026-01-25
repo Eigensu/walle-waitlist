@@ -733,15 +733,15 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              {/* JYPL Season 7 */}
+              {/* JYPL Season 8 */}
               <div>
                 <h3 className="text-lg font-semibold mb-4 text-slate-900 dark:text-white">
-                  JYPL Season 7
+                  JYPL Season 8
                 </h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
-                      Played in Season 7
+                      Played in Season 8
                     </p>
                     <p className="mt-1 text-slate-900 dark:text-white capitalize">
                       {selectedPlayer.played_jypl_s7 || "—"}

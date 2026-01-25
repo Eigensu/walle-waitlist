@@ -35,7 +35,7 @@ const steps = [
   },
   { id: "cricket", label: "Cricket Details", helper: "Your cricket profile" },
   { id: "jersey", label: "Jersey Details", helper: "Jersey & size info" },
-  { id: "jypl7", label: "JYPL 7 Details", helper: "Season 7 history" },
+  { id: "jypl7", label: "JYPL 8 Details", helper: "Season 8 history" },
   { id: "payment", label: "Payment", helper: "Complete registration" },
   {
     id: "done",
@@ -148,9 +148,9 @@ export function RegistrationForm() {
         missing.push("Waist size (20-60)");
       }
       // JYPL7
-      if (!values.played_jypl_s7) missing.push("Played JYPL S7");
+      if (!values.played_jypl_s7) missing.push("Played JYPL S8");
       if (values.played_jypl_s7 === "yes" && !values.jypl_s7_team) {
-        missing.push("JYPL S7 team");
+        missing.push("JYPL S8 team");
       }
 
       if (missing.length) {
@@ -240,7 +240,7 @@ export function RegistrationForm() {
       if (!values.played_jypl_s7) {
         setStatusMessage({
           kind: "error",
-          text: "Please select whether you played in JYPL season 7",
+          text: "Please select whether you played in JYPL season 8",
         });
         isStepValid = false;
       } else if (values.played_jypl_s7 === "yes" && !values.jypl_s7_team) {
@@ -348,13 +348,18 @@ export function RegistrationForm() {
   // Keep CTA clickable unless actually submitting to avoid dead-buttons.
   const isStepDisabled = submitting;
 
+  const firstName = form.watch("first_name");
+  const lastName = form.watch("last_name");
+  const email = form.watch("email");
+  const phone = form.watch("phone");
+
   const summary = useMemo(
     () => ({
-      name: `${form.watch("first_name")} ${form.watch("last_name")}`.trim(),
-      email: form.watch("email"),
-      phone: form.watch("phone"),
+      name: `${firstName} ${lastName}`.trim(),
+      email,
+      phone,
     }),
-    [form],
+    [firstName, lastName, email, phone],
   );
 
   return (
@@ -874,17 +879,26 @@ export function RegistrationForm() {
                       <FormControl>
                         <div className="space-y-3">
                           {[
-                            "Aarya 24kt Royal Rangers",
-                            "Abhushan Warriors",
                             "Auric Allstars",
-                            "AX Logistics",
+                            "SS Lions",
+                            "Presto Gems Rising Stars",
+                            "Rudhraksh Hustlers",
+                            "SMD Strikers",
                             "BVC Champions",
-                            "Bullion India",
                             "DJ Warriors",
-                            "Jewel House Heroes",
-                            "Jewelbuzz Sunrisers",
+                            "Mk shershah",
+                            "AX Royals",
+                            "Jewelhouse Heroes",
+                            "Abhushan warriors",
+                            "Aarya 24Kt Royal Rangers",
+                            "VMC",
+                            "Bullion India",
                             "Mantr Mavericks",
-                            "Master Blasters",
+                            "Shanti Hallmarkers 11",
+                            "Jewelbuzz Sunrisers",
+                            "Masterblasters",
+                            "RCB",
+                            "Pride Pirates",
                           ].map((team) => (
                             <div key={team} className="flex items-center gap-3">
                               <input

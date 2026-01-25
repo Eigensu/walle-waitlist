@@ -38,7 +38,7 @@ class Player(Document):
     tshirt_size: str
     waist_size: int
     
-    # JYPL Season 7 Details
+    # JYPL Season 8 Details
     played_jypl_s7: str
     jypl_s7_team: str = ""
     

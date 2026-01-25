@@ -31,6 +31,7 @@ type RazorpayCheckoutOptions = {
   prefill?: { name?: string; email?: string; contact?: string };
   notes?: Record<string, string>;
   handler: (response: RazorpayHandlerResponse) => void;
+  retry?: { enabled: boolean; max_count?: number };
   theme?: { color?: string };
 };
 
@@ -106,8 +107,9 @@ export function PaymentModal({
       prefill: {
         name: playerName,
         email: contact?.email,
-        contact: contact?.phone,
+        contact: contact?.phone ?? "",
       },
+      retry: { enabled: false },
       handler: onSuccess,
       theme: { color: "#2563EB" },
     });
