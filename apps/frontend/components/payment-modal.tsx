@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { AlertCircle, CreditCard, ShieldCheck } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -32,6 +32,7 @@ type RazorpayCheckoutOptions = {
   notes?: Record<string, string>;
   handler: (response: RazorpayHandlerResponse) => void;
   retry?: { enabled: boolean; max_count?: number };
+  modal?: { ondismiss?: () => void };
   theme?: { color?: string };
 };
 
@@ -49,6 +50,7 @@ type PaymentModalProps = {
   contact?: { email?: string; phone?: string };
   onSuccess: (payload: RazorpayHandlerResponse) => void;
   onFailure?: (message: string) => void;
+  onDismiss?: () => void;
 };
 
 export function PaymentModal({
@@ -59,6 +61,7 @@ export function PaymentModal({
   contact,
   onSuccess,
   onFailure,
+  onDismiss,
 }: PaymentModalProps) {
   const [loadingScript, setLoadingScript] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -110,6 +113,12 @@ export function PaymentModal({
         contact: contact?.phone ?? "",
       },
       retry: { enabled: false },
+      modal: {
+        ondismiss: () => {
+          onDismiss?.();
+          onFailure?.("Payment cancelled");
+        },
+      },
       handler: onSuccess,
       theme: { color: "#2563EB" },
     });
@@ -121,19 +130,22 @@ export function PaymentModal({
     key,
     loadScript,
     onFailure,
+    onDismiss,
     onSuccess,
     order,
     playerName,
   ]);
 
-  useEffect(() => {
-    if (open && order) {
-      void loadScript();
-    }
-  }, [open, order, loadScript]);
-
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => (!isOpen ? onClose() : null)}>
+    <Dialog
+      open={open}
+      onOpenChange={(isOpen) => {
+        if (!isOpen) {
+          onDismiss?.();
+          onClose();
+        }
+      }}
+    >
       <DialogContent className="border-2 border-blue-200 max-w-sm dark:border-blue-800 dark:bg-slate-900">
         <DialogHeader className="pb-2">
           <DialogTitle className="flex items-center gap-2 text-lg text-slate-900 dark:text-white">
@@ -151,7 +163,7 @@ export function PaymentModal({
         </DialogHeader>
 
         <div className="space-y-3">
-          <div className="flex items-center justify-between rounded-lg border border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 px-3 py-3 dark:border-blue-900/40 dark:from-slate-800 dark:to-slate-800">
+          <div className="flex items-center justify-between rounded-lg border border-blue-200 bg-linear-to-r from-blue-50 to-indigo-50 px-3 py-3 dark:border-blue-900/40 dark:from-slate-800 dark:to-slate-800">
             <div>
               <p className="text-xs font-semibold uppercase tracking-wider text-blue-600 dark:text-blue-300">
                 Total Amount
@@ -178,14 +190,14 @@ export function PaymentModal({
           </div>
           {error ? (
             <div className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 dark:border-red-900/40 dark:bg-red-900/20">
-              <AlertCircle className="mt-0.5 size-4 text-red-600 dark:text-red-400 flex-shrink-0" />
+              <AlertCircle className="mt-0.5 size-4 text-red-600 dark:text-red-400 shrink-0" />
               <span className="text-xs font-medium text-red-900 dark:text-red-300">
                 {error}
               </span>
             </div>
           ) : null}
           <div className="flex items-center gap-2 rounded-lg bg-blue-50 px-3 py-2 text-xs text-blue-700 dark:bg-blue-900/20 dark:text-blue-300 dark:border dark:border-blue-900/40">
-            <ShieldCheck className="size-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+            <ShieldCheck className="size-4 text-blue-600 dark:text-blue-400 shrink-0" />
             <span className="font-medium">
               256-bit SSL encrypted checkout powered by Razorpay
             </span>
@@ -196,7 +208,10 @@ export function PaymentModal({
           <Button
             type="button"
             variant="outline"
-            onClick={onClose}
+            onClick={() => {
+              onDismiss?.();
+              onClose();
+            }}
             className="border-blue-300 text-blue-700 hover:bg-blue-50 dark:border-blue-800 dark:text-blue-300 dark:hover:bg-blue-900/20 dark:shadow-none h-9 text-sm"
           >
             Cancel

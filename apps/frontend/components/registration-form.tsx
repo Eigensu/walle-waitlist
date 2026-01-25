@@ -1210,12 +1210,18 @@ export function RegistrationForm() {
 
       <PaymentModal
         open={modalOpen}
-        onClose={() => setModalOpen(false)}
+        onClose={() => {
+          setModalOpen(false);
+        }}
         order={order}
         playerName={summary.name}
         contact={{ email: summary.email, phone: summary.phone }}
         onSuccess={handlePaymentSuccess}
         onFailure={(msg) => setStatusMessage({ kind: "error", text: msg })}
+        onDismiss={() => {
+          setPaymentStatus("idle");
+          setSubmitting(false);
+        }}
       />
     </div>
   );
