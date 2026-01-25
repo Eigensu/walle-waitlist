@@ -34,7 +34,7 @@ export const playerSchema = z.object({
   email: z.string(),
   phone: z
     .string()
-    .regex(/\d{10,}/, "Phone must have at least 10 digits"),
+    .regex(/^\d{10}$/, "Phone must be exactly 10 digits"),
   residential_area: z.string(),
   firm_name: z.string(),
   designation: z.string(),
@@ -46,8 +46,8 @@ export const playerSchema = z.object({
   waist_size: z.coerce.number(),
   played_jypl_s7: z.string(),
   jypl_s7_team: z.string(),
-  photo: z.instanceof(File).nullable(),
-  visiting_card: z.instanceof(File).nullable(),
+  photo: z.union([z.instanceof(File), z.string()]).nullable(),
+  visiting_card: z.union([z.instanceof(File), z.string()]).nullable(),
 });
 
 export type PlayerFormValues = z.infer<typeof playerSchema>;

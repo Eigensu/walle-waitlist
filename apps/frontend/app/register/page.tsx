@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -48,7 +49,7 @@ export default function RegisterPage() {
       </div>
 
       <div className="relative mx-auto flex max-w-5xl flex-col gap-2 px-4 py-4 sm:py-8 sm:px-8 lg:px-10">
-        <header className="relative mb-3 overflow-hidden rounded-xl border-2 border-blue-400/60 bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-700 p-3.5 shadow-lg dark:border-blue-700/50 dark:from-blue-800 dark:via-blue-900 dark:to-indigo-950 sm:rounded-2xl sm:p-5">
+        <header className="relative mb-3 overflow-hidden rounded-2xl border-2 border-blue-400/60 bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-700 p-6 sm:p-8 shadow-lg dark:border-blue-700/50 dark:from-blue-800 dark:via-blue-900 dark:to-indigo-950">
           {/* Subtle cricket stitches pattern */}
           <div className="pointer-events-none absolute right-4 top-4 h-16 w-16 opacity-[0.07] sm:h-20 sm:w-20">
             <div className="absolute left-1/2 top-0 h-full w-0.5 -translate-x-1/2 bg-white" />
@@ -109,12 +110,12 @@ export default function RegisterPage() {
         </header>
 
         {/* Sponsor strip now outside header */}
-        <div className="mb-2 sm:mb-4">
-          <SponsorStrip className="mx-auto max-w-2xl" />
+        <div className="mb-3">
+          <SponsorStrip />
         </div>
 
         <Card className="border-2 border-blue-200 bg-white/95 shadow-2xl shadow-blue-100/60 backdrop-blur dark:border-slate-700 dark:bg-slate-800/90 dark:shadow-none">
-          <CardContent className="p-6 sm:p-8 space-y-3 pt-4 sm:pt-4">
+          <CardContent className="p-6 sm:p-8 space-y-3">
             {regOpen === false ? (
               <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-6 text-center text-slate-800 dark:border-yellow-900/40 dark:bg-yellow-950/20 dark:text-yellow-200">
                 <p className="text-lg font-semibold">
@@ -125,7 +126,15 @@ export default function RegisterPage() {
                 </p>
               </div>
             ) : (
-              <RegistrationForm />
+              <Suspense
+                fallback={
+                  <div className="text-center text-sm text-slate-500">
+                    Loading registration form…
+                  </div>
+                }
+              >
+                <RegistrationFormWrapper />
+              </Suspense>
             )}
             <p className="mt-10 text-center text-xs text-slate-500 dark:text-slate-400">
               By registering, you agree to our{" "}
@@ -149,4 +158,10 @@ export default function RegisterPage() {
       </div>
     </div>
   );
+}
+
+function RegistrationFormWrapper() {
+  const searchParams = useSearchParams();
+  const resumePlayerId = searchParams.get("resume");
+  return <RegistrationForm resumePlayerId={resumePlayerId} />;
 }

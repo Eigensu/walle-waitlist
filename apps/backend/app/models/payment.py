@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 from enum import Enum
 
 from beanie import Document, Indexed
@@ -13,8 +14,9 @@ class PaymentStatus(str, Enum):
     FAILED = "FAILED"
 
 
-def utc_now() -> datetime:
-    return datetime.now(timezone.utc)
+def ist_now() -> datetime:
+    """Return current time in Indian Standard Time (IST)"""
+    return datetime.now(ZoneInfo("Asia/Kolkata"))
 
 
 class Payment(Document):
@@ -25,7 +27,7 @@ class Payment(Document):
     status: PaymentStatus = PaymentStatus.CREATED
     amount: int
     currency: str = "INR"
-    created_at: datetime = Field(default_factory=utc_now)
+    created_at: datetime = Field(default_factory=ist_now)
 
     model_config = ConfigDict(str_strip_whitespace=True)
 

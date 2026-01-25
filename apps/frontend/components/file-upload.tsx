@@ -3,7 +3,7 @@
 import { useMemo, useRef, useId, useState } from "react";
 import { UploadCloud } from "lucide-react";
 
-import { FormDescription, FormLabel, FormMessage } from "@/components/ui/form";
+import { FormLabel, FormMessage } from "@/components/ui/form";
 
 export type FileUploadProps = {
   label: string;
@@ -85,6 +85,7 @@ export function FileUpload({
               ?.split(",")
               .map((t) => t.trim())
               .filter(Boolean);
+            const allowedList = allowedTypes ?? [];
 
             if (file.size > maxBytes) {
               const mb = maxBytes / (1024 * 1024);
@@ -99,13 +100,21 @@ export function FileUpload({
               return;
             }
 
-            if (
-              allowedTypes &&
-              allowedTypes.length > 0 &&
-              !allowedTypes.includes(file.type)
-            ) {
+            const isAllowed = (() => {
+              if (!allowedTypes || allowedTypes.length === 0) return true;
+              // Direct match or wildcard type/* match
+              return allowedTypes.some((type) => {
+                if (type.endsWith("/*")) {
+                  const prefix = type.replace("/*", "");
+                  return file.type.startsWith(`${prefix}/`);
+                }
+                return type === file.type;
+              });
+            })();
+
+            if (!isAllowed) {
               setLocalError(
-                `Unsupported file type (${file.type || "unknown"}). Allowed: ${allowedTypes.join(", ")}`,
+                `Unsupported file type (${file.type || "unknown"}). Allowed: ${allowedList.join(", ")}`,
               );
               onChange(null);
               // Reset input

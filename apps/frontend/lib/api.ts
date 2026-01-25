@@ -15,6 +15,38 @@ export type VerifyPaymentResponse = {
   message: string;
 };
 
+export type ResumePaymentResponse = {
+  player_id: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  phone: string;
+  registration_status: string;
+  message: string;
+};
+
+export type PlayerDetailsResponse = {
+  player_id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string;
+  residential_area: string;
+  firm_name: string;
+  designation: string;
+  photo_url: string;
+  visiting_card_url: string;
+  batting_type: string;
+  bowling_type: string;
+  wicket_keeper: string;
+  name_on_jersey: string;
+  tshirt_size: string;
+  waist_size: number;
+  played_jypl_s7: string;
+  jypl_s7_team: string;
+  registration_status: string;
+};
+
 export type PublicConfig = { registration_open: boolean };
 export type AdminConfig = { registration_open: boolean };
 
@@ -30,6 +62,15 @@ async function handleJson<T>(res: Response): Promise<T> {
 export async function registerPlayer(formData: FormData): Promise<RegisterResponse> {
   const res = await fetch("/api/register", {
     method: "POST",
+    body: formData,
+  });
+
+  return handleJson<RegisterResponse>(res);
+}
+
+export async function updatePlayer(playerId: string, formData: FormData): Promise<RegisterResponse> {
+  const res = await fetch(`/api/player/${playerId}`, {
+    method: "PUT",
     body: formData,
   });
 
@@ -59,6 +100,21 @@ export async function verifyPayment(payload: {
   });
 
   return handleJson<VerifyPaymentResponse>(res);
+}
+
+export async function resumePayment(email: string): Promise<ResumePaymentResponse> {
+  const res = await fetch("/api/resume-payment", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+  });
+
+  return handleJson<ResumePaymentResponse>(res);
+}
+
+export async function getPlayerDetails(playerId: string): Promise<PlayerDetailsResponse> {
+  const res = await fetch(`/api/player/${playerId}`);
+  return handleJson<PlayerDetailsResponse>(res);
 }
 
 export async function getPublicConfig(): Promise<PublicConfig> {

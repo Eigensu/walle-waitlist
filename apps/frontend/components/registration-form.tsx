@@ -1,31 +1,28 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { Loader2, ShieldCheck } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 
 import { PaymentModal } from "@/components/payment-modal";
-import { RulesNotice } from "@/components/rules-notice";
 import { Stepper } from "@/components/stepper";
-import { FileUpload } from "@/components/file-upload";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { Form } from "@/components/ui/form";
 import {
   createOrder,
+  getPlayerDetails,
   registerPlayer,
+  updatePlayer,
   verifyPayment,
   type CreateOrderResponse,
 } from "@/lib/api";
-import { fileConstraints, type PlayerFormValues } from "@/lib/validators";
+import { type PlayerFormValues } from "@/lib/validators";
+import { PersonalDetailsStep } from "@/components/registration-steps/personal-details-step";
+import { CricketDetailsStep } from "@/components/registration-steps/cricket-details-step";
+import { JerseyDetailsStep } from "@/components/registration-steps/jersey-details-step";
+import { JyplSeasonStep } from "@/components/registration-steps/jypl-season-step";
+import { PaymentStep } from "@/components/registration-steps/payment-step";
+import { ConfirmationStep } from "@/components/registration-steps/confirmation-step";
 
 const steps = [
   {
@@ -48,7 +45,11 @@ type PaymentStatus = "idle" | "processing" | "paid" | "failed";
 
 type StatusMessage = { kind: "success" | "error"; text: string } | null;
 
-export function RegistrationForm() {
+export function RegistrationForm({
+  resumePlayerId,
+}: {
+  resumePlayerId?: string | null;
+}) {
   const form = useForm<PlayerFormValues>({
     mode: "onChange",
     defaultValues: {
@@ -79,6 +80,59 @@ export function RegistrationForm() {
   const [statusMessage, setStatusMessage] = useState<StatusMessage>(null);
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>("idle");
   const [submitting, setSubmitting] = useState(false);
+  const [loadingPlayerData, setLoadingPlayerData] = useState(false);
+
+  // Handle resume payment - load player data and jump to payment step
+  useEffect(() => {
+    const loadPlayerData = async () => {
+      if (!resumePlayerId) return;
+
+      setLoadingPlayerData(true);
+      try {
+        const playerData = await getPlayerDetails(resumePlayerId);
+
+        // Populate form with player data
+        form.reset({
+          first_name: playerData.first_name,
+          last_name: playerData.last_name,
+          email: playerData.email,
+          phone: playerData.phone,
+          residential_area: playerData.residential_area,
+          firm_name: playerData.firm_name,
+          designation: playerData.designation,
+          batting_type: playerData.batting_type,
+          bowling_type: playerData.bowling_type,
+          wicket_keeper: playerData.wicket_keeper,
+          name_on_jersey: playerData.name_on_jersey,
+          tshirt_size: playerData.tshirt_size,
+          waist_size: playerData.waist_size,
+          played_jypl_s7: playerData.played_jypl_s7,
+          jypl_s7_team: playerData.jypl_s7_team,
+          photo: playerData.photo_url,
+          visiting_card: playerData.visiting_card_url,
+        });
+
+        setPlayerId(resumePlayerId);
+        setStepIndex(4); // Jump to payment step (index 4)
+        setStatusMessage({
+          kind: "success",
+          text: "Welcome back! Complete your payment to finish registration.",
+        });
+      } catch (error) {
+        setStatusMessage({
+          kind: "error",
+          text:
+            error instanceof Error
+              ? error.message
+              : "Failed to load player data",
+        });
+      } finally {
+        setLoadingPlayerData(false);
+      }
+    };
+
+    loadPlayerData();
+  }, [resumePlayerId, form]);
 
   const displayStepIndex = Math.min(stepIndex, steps.length - 1);
   const currentStepId =
@@ -172,8 +226,17 @@ export function RegistrationForm() {
         }
       });
 
-      const response = await registerPlayer(formData);
-      setPlayerId(response.player_id);
+      // Check if we're updating an existing player or creating a new one
+      let response;
+      if (playerId) {
+        // Update existing player
+        response = await updatePlayer(playerId, formData);
+      } else {
+        // Register new player
+        response = await registerPlayer(formData);
+        setPlayerId(response.player_id);
+      }
+
       setStatusMessage({
         kind: "success",
         text: response.message || "Details saved",
@@ -266,7 +329,11 @@ export function RegistrationForm() {
       // 2. This is the "3-5 second" wait - user sees spinner on button
       const created = await createOrder(playerId);
       setOrder(created);
-      // 3. Modal opens with pre-filled data
+
+      // 3. Reset submitting BEFORE opening modal so button appears normal again
+      setSubmitting(false);
+
+      // 4. Modal opens with pre-filled data
       setModalOpen(true);
     } catch (error) {
       const message =
@@ -366,6 +433,20 @@ export function RegistrationForm() {
     [firstName, lastName, email, phone],
   );
 
+  // Show loading state while fetching player data
+  if (loadingPlayerData) {
+    return (
+      <div className="flex items-center justify-center py-16">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+          <p className="text-sm text-slate-600 dark:text-slate-400">
+            Loading your registration details...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       <Stepper steps={steps} activeIndex={displayStepIndex} />
@@ -373,656 +454,26 @@ export function RegistrationForm() {
       <Form {...form}>
         <form className="space-y-6" onSubmit={handlePersonalSubmit}>
           {currentStepId === "details" && (
-            <div className="space-y-6">
-              <RulesNotice />
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <FormField
-                  control={form.control}
-                  name="first_name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>First name</FormLabel>
-                      <FormControl>
-                        <Input
-                          className={fieldClass}
-                          placeholder="John"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="last_name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Last name</FormLabel>
-                      <FormControl>
-                        <Input
-                          className={fieldClass}
-                          placeholder="Doe"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="email"
-                          className={fieldClass}
-                          placeholder="you@example.com"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="phone"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Phone</FormLabel>
-                      <FormControl>
-                        <Input
-                          className={fieldClass}
-                          placeholder="+919876543210"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        Min 10 digits; include country code if applicable
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="residential_area"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Residential area</FormLabel>
-                      <FormControl>
-                        <Input
-                          className={fieldClass}
-                          placeholder="Bandra West, Mumbai"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="firm_name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Firm / company</FormLabel>
-                      <FormControl>
-                        <Input
-                          className={fieldClass}
-                          placeholder="Acme Corporation"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="designation"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Designation</FormLabel>
-                      <FormControl>
-                        <Input
-                          className={fieldClass}
-                          placeholder="Senior Manager"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <FormField
-                  control={form.control}
-                  name="photo"
-                  render={({ field, fieldState }) => (
-                    <FormItem>
-                      <FormControl>
-                        <FileUpload
-                          label="Photo (JPG/PNG)"
-                          description="Max 5MB"
-                          accept={fileConstraints.photoMimes.join(",")}
-                          value={field.value ?? null}
-                          onChange={(file) => field.onChange(file)}
-                          error={fieldState.error?.message}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="visiting_card"
-                  render={({ field, fieldState }) => (
-                    <FormItem>
-                      <FormControl>
-                        <FileUpload
-                          label="Visiting card (JPG/PNG/PDF)"
-                          description="Max 5MB"
-                          accept={fileConstraints.cardMimes.join(",")}
-                          value={field.value ?? null}
-                          onChange={(file) => field.onChange(file)}
-                          error={fieldState.error?.message}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="flex items-center gap-3 rounded-xl border-2 border-blue-200 bg-gradient-to-r from-blue-50 to-white px-4 py-3 text-sm dark:border-blue-900/40 dark:from-blue-950/40 dark:to-slate-800/40">
-                <ShieldCheck className="size-5 text-blue-600 dark:text-blue-400" />
-                <span className="font-medium text-blue-700 dark:text-blue-300">
-                  Files are encrypted and stored securely
-                </span>
-              </div>
-            </div>
+            <PersonalDetailsStep form={form} fieldClass={fieldClass} />
           )}
 
-          {currentStepId === "cricket" && (
-            <div className="space-y-6">
-              <FormField
-                control={form.control}
-                name="batting_type"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-base font-semibold">
-                      Batting Type
-                    </FormLabel>
-                    <FormControl>
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-3">
-                          <input
-                            type="checkbox"
-                            id="right_hand"
-                            checked={field.value === "right"}
-                            onChange={() =>
-                              field.onChange(
-                                field.value === "right" ? "" : "right",
-                              )
-                            }
-                            className="h-5 w-5 cursor-pointer rounded border-2 border-slate-300 accent-blue-600 dark:border-slate-600"
-                          />
-                          <label
-                            htmlFor="right_hand"
-                            className="cursor-pointer text-slate-700 dark:text-slate-300"
-                          >
-                            Right Hand Batsman
-                          </label>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <input
-                            type="checkbox"
-                            id="left_hand"
-                            checked={field.value === "left"}
-                            onChange={() =>
-                              field.onChange(
-                                field.value === "left" ? "" : "left",
-                              )
-                            }
-                            className="h-5 w-5 cursor-pointer rounded border-2 border-slate-300 accent-blue-600 dark:border-slate-600"
-                          />
-                          <label
-                            htmlFor="left_hand"
-                            className="cursor-pointer text-slate-700 dark:text-slate-300"
-                          >
-                            Left Hand Batsman
-                          </label>
-                        </div>
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="bowling_type"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-base font-semibold">
-                      Bowling Type
-                    </FormLabel>
-                    <FormControl>
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-3">
-                          <input
-                            type="checkbox"
-                            id="right_arm"
-                            checked={field.value === "right"}
-                            onChange={() =>
-                              field.onChange(
-                                field.value === "right" ? "" : "right",
-                              )
-                            }
-                            className="h-5 w-5 cursor-pointer rounded border-2 border-slate-300 accent-blue-600 dark:border-slate-600"
-                          />
-                          <label
-                            htmlFor="right_arm"
-                            className="cursor-pointer text-slate-700 dark:text-slate-300"
-                          >
-                            Right Arm
-                          </label>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <input
-                            type="checkbox"
-                            id="left_arm"
-                            checked={field.value === "left"}
-                            onChange={() =>
-                              field.onChange(
-                                field.value === "left" ? "" : "left",
-                              )
-                            }
-                            className="h-5 w-5 cursor-pointer rounded border-2 border-slate-300 accent-blue-600 dark:border-slate-600"
-                          />
-                          <label
-                            htmlFor="left_arm"
-                            className="cursor-pointer text-slate-700 dark:text-slate-300"
-                          >
-                            Left Arm
-                          </label>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <input
-                            type="checkbox"
-                            id="not_applicable"
-                            checked={field.value === "not_applicable"}
-                            onChange={() =>
-                              field.onChange(
-                                field.value === "not_applicable"
-                                  ? ""
-                                  : "not_applicable",
-                              )
-                            }
-                            className="h-5 w-5 cursor-pointer rounded border-2 border-slate-300 accent-blue-600 dark:border-slate-600"
-                          />
-                          <label
-                            htmlFor="not_applicable"
-                            className="cursor-pointer text-slate-700 dark:text-slate-300"
-                          >
-                            Not Applicable
-                          </label>
-                        </div>
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="wicket_keeper"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-base font-semibold">
-                      Wicket Keeper
-                    </FormLabel>
-                    <FormControl>
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-3">
-                          <input
-                            type="checkbox"
-                            id="wk_yes"
-                            checked={field.value === "yes"}
-                            onChange={() =>
-                              field.onChange(field.value === "yes" ? "" : "yes")
-                            }
-                            className="h-5 w-5 cursor-pointer rounded border-2 border-slate-300 accent-blue-600 dark:border-slate-600"
-                          />
-                          <label
-                            htmlFor="wk_yes"
-                            className="cursor-pointer text-slate-700 dark:text-slate-300"
-                          >
-                            Yes
-                          </label>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <input
-                            type="checkbox"
-                            id="wk_no"
-                            checked={field.value === "no"}
-                            onChange={() =>
-                              field.onChange(field.value === "no" ? "" : "no")
-                            }
-                            className="h-5 w-5 cursor-pointer rounded border-2 border-slate-300 accent-blue-600 dark:border-slate-600"
-                          />
-                          <label
-                            htmlFor="wk_no"
-                            className="cursor-pointer text-slate-700 dark:text-slate-300"
-                          >
-                            No
-                          </label>
-                        </div>
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          )}
+          {currentStepId === "cricket" && <CricketDetailsStep form={form} />}
 
           {currentStepId === "jersey" && (
-            <div className="space-y-6">
-              <FormField
-                control={form.control}
-                name="name_on_jersey"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Name on Jersey</FormLabel>
-                    <FormControl>
-                      <input
-                        {...field}
-                        type="text"
-                        placeholder="Your jersey name (max 15 chars)"
-                        maxLength={15}
-                        className={fieldClass}
-                      />
-                    </FormControl>
-                    <FormDescription>Max 15 characters</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="tshirt_size"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>T-Shirt Size</FormLabel>
-                    <FormControl>
-                      <select
-                        {...field}
-                        className={fieldClass + " cursor-pointer"}
-                      >
-                        <option value="">Select size</option>
-                        <option value="xs">XS</option>
-                        <option value="s">S</option>
-                        <option value="m">M</option>
-                        <option value="l">L</option>
-                        <option value="xl">XL</option>
-                        <option value="xxl">XXL</option>
-                        <option value="xxxl">3XL</option>
-                        <option value="xxxxl">4XL</option>
-                        <option value="xxxxxl">5XL</option>
-                      </select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="waist_size"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Waist Size</FormLabel>
-                    <FormControl>
-                      <input
-                        {...field}
-                        type="number"
-                        placeholder="e.g., 42"
-                        min="20"
-                        max="60"
-                        className={fieldClass}
-                      />
-                    </FormControl>
-                    <FormDescription>In inches (20-60)</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+            <JerseyDetailsStep form={form} fieldClass={fieldClass} />
           )}
 
-          {currentStepId === "jypl7" && (
-            <div className="space-y-6">
-              <FormField
-                control={form.control}
-                name="played_jypl_s7"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-base font-semibold">
-                      Have you played in season 8, 2025?
-                    </FormLabel>
-                    <FormControl>
-                      <div className="flex gap-6">
-                        <div className="flex items-center gap-3">
-                          <input
-                            type="checkbox"
-                            id="jypl7_yes"
-                            checked={field.value === "yes"}
-                            onChange={() =>
-                              field.onChange(field.value === "yes" ? "" : "yes")
-                            }
-                            className="h-5 w-5 cursor-pointer rounded border-2 border-slate-300 accent-blue-600 dark:border-slate-600"
-                          />
-                          <label
-                            htmlFor="jypl7_yes"
-                            className="cursor-pointer text-slate-700 dark:text-slate-300"
-                          >
-                            Yes
-                          </label>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <input
-                            type="checkbox"
-                            id="jypl7_no"
-                            checked={field.value === "no"}
-                            onChange={() =>
-                              field.onChange(field.value === "no" ? "" : "no")
-                            }
-                            className="h-5 w-5 cursor-pointer rounded border-2 border-slate-300 accent-blue-600 dark:border-slate-600"
-                          />
-                          <label
-                            htmlFor="jypl7_no"
-                            className="cursor-pointer text-slate-700 dark:text-slate-300"
-                          >
-                            No
-                          </label>
-                        </div>
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {form.watch("played_jypl_s7") === "yes" && (
-                <FormField
-                  control={form.control}
-                  name="jypl_s7_team"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-base font-semibold">
-                        If yes, which team?
-                      </FormLabel>
-                      <FormControl>
-                        <div className="space-y-3">
-                          {[
-                            "Auric Allstars",
-                            "SS Lions",
-                            "Presto Gems Rising Stars",
-                            "Rudhraksh Hustlers",
-                            "SMD Strikers",
-                            "BVC Champions",
-                            "DJ Warriors",
-                            "Mk shershah",
-                            "AX Royals",
-                            "Jewelhouse Heroes",
-                            "Abhushan warriors",
-                            "Aarya 24Kt Royal Rangers",
-                            "VMC",
-                            "Bullion India",
-                            "Mantr Mavericks",
-                            "Shanti Hallmarkers 11",
-                            "Jewelbuzz Sunrisers",
-                            "Masterblasters",
-                            "RCB",
-                            "Pride Pirates",
-                          ].map((team) => (
-                            <div key={team} className="flex items-center gap-3">
-                              <input
-                                type="checkbox"
-                                id={`team_${team}`}
-                                checked={field.value === team}
-                                onChange={() =>
-                                  field.onChange(
-                                    field.value === team ? "" : team,
-                                  )
-                                }
-                                className="h-5 w-5 cursor-pointer rounded border-2 border-slate-300 accent-blue-600 dark:border-slate-600"
-                              />
-                              <label
-                                htmlFor={`team_${team}`}
-                                className="cursor-pointer text-slate-700 dark:text-slate-300"
-                              >
-                                {team}
-                              </label>
-                            </div>
-                          ))}
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
-            </div>
-          )}
+          {currentStepId === "jypl7" && <JyplSeasonStep form={form} />}
 
           {currentStepId === "payment" && (
-            <div className="space-y-6">
-              <div className="rounded-2xl border-2 border-blue-200 bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-6 shadow-lg dark:border-blue-900/40 dark:from-blue-950/20 dark:via-slate-800/30 dark:to-slate-800/20">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-blue-600 dark:text-white">
-                      Player Name
-                    </p>
-                    <p className="mt-1 text-lg font-semibold text-blue-900 dark:text-white">
-                      {summary.name}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-blue-600 dark:text-white">
-                      Registration Fee
-                    </p>
-                    <p className="mt-1 text-3xl font-bold text-blue-900 dark:text-white">
-                      ₹
-                      {order ? (order.amount / 100).toLocaleString() : "15,000"}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-xl border-2 border-blue-200 bg-blue-50/50 p-4 dark:border-blue-900/40 dark:bg-blue-950/20">
-                <div className="flex items-start gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-600 text-white dark:bg-blue-600">
-                    <svg
-                      className="h-5 w-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                  </div>
-                  <div className="text-sm">
-                    <p className="font-semibold text-blue-900 dark:text-white">
-                      Ready to complete payment
-                    </p>
-                    <p className="mt-1 text-blue-700 dark:text-white">
-                      Click proceed to open the secure Razorpay checkout. You
-                      will return here for confirmation after payment.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <PaymentStep
+              playerName={summary.name}
+              order={order}
+              onEditDetails={() => setStepIndex(0)}
+            />
           )}
 
-          {currentStepId === "done" && (
-            <div className="rounded-2xl border-2 border-green-200 bg-gradient-to-br from-green-50 to-white p-6 shadow-lg dark:border-green-900/40 dark:from-green-950/20 dark:to-slate-800/30">
-              <div className="flex items-start gap-4">
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-green-600 text-white shadow-lg shadow-green-200 dark:shadow-green-950/60">
-                  <svg
-                    className="h-8 w-8"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={3}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                </div>
-                <div>
-                  <p className="text-xl font-bold text-green-900 dark:text-white">
-                    Payment Confirmed!
-                  </p>
-                  <p className="mt-1 text-green-700 dark:text-white">
-                    Thank you for registering with Walle Arena your payment for
-                    JYPL SEASON 9 is received
-                  </p>
-                  <p className="mt-3 text-sm text-green-600 dark:text-white">
-                    Player ID:{" "}
-                    <span className="font-mono font-semibold">{playerId}</span>
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
+          {currentStepId === "done" && <ConfirmationStep playerId={playerId} />}
 
           {statusMessage ? (
             <div
@@ -1035,7 +486,7 @@ export function RegistrationForm() {
               <div className="flex items-center gap-2">
                 {statusMessage.kind === "success" ? (
                   <svg
-                    className="h-5 w-5"
+                    className="h-5 w-5 text-green-600"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -1049,7 +500,7 @@ export function RegistrationForm() {
                   </svg>
                 ) : (
                   <svg
-                    className="h-5 w-5"
+                    className="h-5 w-5 text-red-600"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -1058,7 +509,7 @@ export function RegistrationForm() {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
-                      d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
                     />
                   </svg>
                 )}
@@ -1144,59 +595,36 @@ export function RegistrationForm() {
             )}
 
             {currentStepId === "payment" && (
-              <>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setStepIndex(3)}
-                  className="border-blue-300 text-blue-700 hover:bg-blue-50 dark:border-blue-800 dark:text-blue-300 dark:hover:bg-blue-900/20 dark:shadow-none"
-                >
-                  <svg
-                    className="mr-2 h-4 w-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M11 17l-5-5m0 0l5-5m-5 5h12"
-                    />
-                  </svg>
-                  Back
-                </Button>
-                <Button
-                  type="button"
-                  onClick={startPayment}
-                  disabled={submitting || paymentStatus === "processing"}
-                  className="bg-blue-600 text-white hover:bg-blue-700 shadow-md shadow-blue-200 disabled:bg-slate-400 disabled:cursor-not-allowed dark:shadow-none dark:disabled:bg-slate-600"
-                >
-                  {submitting ? (
-                    <>
-                      <Loader2 className="mr-2 size-4 animate-spin" />
-                      <span>Processing Order...</span>
-                    </>
-                  ) : (
-                    <>
-                      <span>Proceed to Payment</span>
-                      <svg
-                        className="ml-2 h-4 w-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
-                        />
-                      </svg>
-                    </>
-                  )}
-                </Button>
-              </>
+              <Button
+                type="button"
+                onClick={startPayment}
+                disabled={submitting || paymentStatus === "processing"}
+                className="bg-blue-600 text-white hover:bg-blue-700 shadow-md shadow-blue-200 disabled:bg-slate-400 disabled:cursor-not-allowed dark:shadow-none dark:disabled:bg-slate-600"
+              >
+                {submitting ? (
+                  <>
+                    <Loader2 className="mr-2 size-4 animate-spin" />
+                    <span>Processing Order...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Proceed to Payment</span>
+                    <svg
+                      className="ml-2 h-4 w-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
+                      />
+                    </svg>
+                  </>
+                )}
+              </Button>
             )}
 
             {currentStepId === "done" && (

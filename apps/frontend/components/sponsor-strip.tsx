@@ -11,8 +11,8 @@ export function SponsorStrip({ className }: Props) {
   return (
     <div
       className={cn(
-        "flex flex-col gap-3 px-4 pt-4 pb-2",
-        "rounded-lg border border-blue-400/60 bg-gradient-to-r from-slate-900 via-blue-900 to-slate-900",
+        "flex flex-col gap-6 p-6 sm:p-8",
+        "rounded-2xl border-2 border-blue-400/60 bg-gradient-to-r from-slate-900 via-blue-900 to-slate-900",
         "dark:border-blue-700/50",
         className,
       )}
