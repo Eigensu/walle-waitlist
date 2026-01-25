@@ -256,13 +256,17 @@ export function RegistrationForm() {
 
   const startPayment = async () => {
     if (!playerId) return;
+
+    // 1. Disable button immediately for visual feedback
     setSubmitting(true);
     setStatusMessage(null);
     setPaymentStatus("processing");
 
     try {
+      // 2. This is the "3-5 second" wait - user sees spinner on button
       const created = await createOrder(playerId);
       setOrder(created);
+      // 3. Modal opens with pre-filled data
       setModalOpen(true);
     } catch (error) {
       const message =
@@ -271,7 +275,7 @@ export function RegistrationForm() {
           : "Unable to create payment order";
       setStatusMessage({ kind: "error", text: message });
       setPaymentStatus("failed");
-    } finally {
+      // 4. Reset loading state on error so user can retry
       setSubmitting(false);
     }
   };
@@ -1166,12 +1170,12 @@ export function RegistrationForm() {
                   type="button"
                   onClick={startPayment}
                   disabled={submitting || paymentStatus === "processing"}
-                  className="bg-blue-600 text-white hover:bg-blue-700 shadow-md shadow-blue-200 dark:shadow-none"
+                  className="bg-blue-600 text-white hover:bg-blue-700 shadow-md shadow-blue-200 disabled:bg-slate-400 disabled:cursor-not-allowed dark:shadow-none dark:disabled:bg-slate-600"
                 >
                   {submitting ? (
                     <>
                       <Loader2 className="mr-2 size-4 animate-spin" />
-                      <span>Processing...</span>
+                      <span>Processing Order...</span>
                     </>
                   ) : (
                     <>
@@ -1212,6 +1216,8 @@ export function RegistrationForm() {
         open={modalOpen}
         onClose={() => {
           setModalOpen(false);
+          setPaymentStatus("idle");
+          setSubmitting(false);
         }}
         order={order}
         playerName={summary.name}
@@ -1219,6 +1225,7 @@ export function RegistrationForm() {
         onSuccess={handlePaymentSuccess}
         onFailure={(msg) => setStatusMessage({ kind: "error", text: msg })}
         onDismiss={() => {
+          setModalOpen(false);
           setPaymentStatus("idle");
           setSubmitting(false);
         }}

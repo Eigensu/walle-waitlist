@@ -115,8 +115,8 @@ export function PaymentModal({
       retry: { enabled: false },
       modal: {
         ondismiss: () => {
+          // Only trigger dismiss callback, let parent handle state reset
           onDismiss?.();
-          onFailure?.("Payment cancelled");
         },
       },
       handler: onSuccess,
