@@ -6,6 +6,7 @@ from app.core.config import Settings
 from app.models.payment import Payment, PaymentStatus
 from app.models.player import Player, RegistrationStatus
 from app.services.razorpay import RazorpayService
+from app.services.email_service import send_success_email
 
 router = APIRouter(prefix="/api/payments", tags=["payments"])
 
@@ -181,5 +182,17 @@ async def razorpay_webhook(
         if player:
             player.registration_status = RegistrationStatus.PAID
             await player.save()
+            
+            # Send confirmation email
+            full_name = f"{player.first_name} {player.last_name}"
+            amount_inr = payment.amount // 100  # Convert paise to rupees
+            
+            # Send email asynchronously (non-blocking)
+            await send_success_email(
+                to_email=player.email,
+                name=full_name,
+                player_id=str(player.id),
+                amount=amount_inr
+            )
 
     return {"status": "ok"}

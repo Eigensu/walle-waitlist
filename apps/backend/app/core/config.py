@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Literal
 
 from dotenv import load_dotenv
-from pydantic import Field, field_validator
+from pydantic import EmailStr, Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -39,6 +39,14 @@ class Settings(BaseSettings):
 
 	admin_username: str = Field(default="admin", alias="ADMIN_USERNAME")
 	admin_password: str = Field(..., alias="ADMIN_PASSWORD")
+
+	# Email Settings
+	mail_username: str = Field(..., alias="MAIL_USERNAME")
+	mail_password: str = Field(..., alias="MAIL_PASSWORD")
+	mail_from: EmailStr = Field(..., alias="MAIL_FROM")
+	mail_port: int = Field(default=587, alias="MAIL_PORT")
+	mail_server: str = Field(default="smtp.gmail.com", alias="MAIL_SERVER")
+	mail_from_name: str = Field(default="JYPL Registration Team", alias="MAIL_FROM_NAME")
 
 	model_config = SettingsConfigDict(
 		env_file=ROOT_ENV_PATH,
