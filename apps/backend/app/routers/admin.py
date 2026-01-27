@@ -366,3 +366,64 @@ async def reject_player(
     await player.save()
     
     return {"message": "Player rejected"}
+
+
+@router.post("/resend-email/{player_id}")
+async def resend_email(
+    player_id: str,
+    username: str,
+    password: str,
+    settings: Settings = Depends(get_settings),
+):
+    """Resend email based on player status."""
+    if not verify_admin_credentials(username, password, settings):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid credentials"
+        )
+    
+    try:
+        from beanie import PydanticObjectId
+        player = await Player.get(PydanticObjectId(player_id))
+    except Exception:
+        raise HTTPException(status_code=404, detail="Player not found")
+        
+    if not player:
+        raise HTTPException(status_code=404, detail="Player not found")
+
+    from app.services.email_service import send_approval_email, send_success_email
+
+    if player.registration_status == RegistrationStatus.APPROVED:
+        # Resend Approval Email
+        success = await send_approval_email(
+            to_email=player.email,
+            name=f"{player.first_name} {player.last_name}",
+            player_id=str(player.id)
+        )
+        if not success:
+             raise HTTPException(status_code=500, detail="Failed to send approval email")
+        return {"message": "Approval email resent"}
+
+    elif player.registration_status == RegistrationStatus.PAID:
+        # Resend Success Email
+        # We might need payment amount. Defaulting to 12500 if not found, 
+        # or we could fetch payment but for email resend it might be overkill (?)
+        # Let's try to fetch payment to be accurate.
+        payment = await Payment.find_one(Payment.player_id == str(player.id))
+        amount = payment.amount if payment else 12500
+
+        success = await send_success_email(
+            to_email=player.email,
+            name=f"{player.first_name} {player.last_name}",
+            player_id=str(player.id),
+            amount=amount
+        )
+        if not success:
+             raise HTTPException(status_code=500, detail="Failed to send success email")
+        return {"message": "Payment confirmation email resent"}
+    
+    else:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Cannot resend email for status: {player.registration_status}. Only APPROVED or PAID allowed."
+        )

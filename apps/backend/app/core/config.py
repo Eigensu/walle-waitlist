@@ -41,12 +41,7 @@ class Settings(BaseSettings):
 	admin_password: str = Field(..., alias="ADMIN_PASSWORD")
 
 	# Email Settings
-	mail_username: str = Field(..., alias="MAIL_USERNAME")
-	mail_password: str = Field(..., alias="MAIL_PASSWORD")
-	mail_from: EmailStr = Field(..., alias="MAIL_FROM")
-	mail_port: int = Field(default=465, alias="MAIL_PORT")
-	mail_server: str = Field(default="smtp.gmail.com", alias="MAIL_SERVER")
-	mail_from_name: str = Field(default="JYPL Registration Team", alias="MAIL_FROM_NAME")
+	resend_api_key: str | None = Field(default=None, alias="RESEND_API_KEY")
 
 	model_config = SettingsConfigDict(
 		env_file=ROOT_ENV_PATH,

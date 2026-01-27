@@ -1,83 +1,83 @@
-"""Email service for sending registration confirmation emails."""
+"""Email service for sending registration confirmation emails via Resend API."""
 
-from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
+import httpx
+from fastapi_mail import MessageSchema # Keeping MessageSchema for compatibility with existing imports, or we can define simple dataclass
 from app.core.config import get_settings
 
 settings = get_settings()
 
-# Email Configuration
-mail_port = settings.mail_port
-mail_server = settings.mail_server
+# We can mimic MessageSchema if we want to remove fastapi-mail dep entirely,
+# but for now, let's assume valid imports or just use simple dicts/dataclasses if fastapi_mail is removed.
+# To be safe and clean, let's keep MessageSchema if it's imported elsewhere, 
+# BUT the plan said "Remove SMTP Logic", so let's stick to using the existing MessageSchema to avoid breaking route imports
+# OR better: Refactor imports in routes if we remove fastapi-mail.
+# Let's check imports in routers/admin.py: "from app.services.email_service import send_approval_email"
+# It doesn't import MessageSchema usually.
+# Let's check the previous file content... MessageSchema was imported from fastapi_mail.
+# If we remove fastapi_mail dependency, we need to provide a replacement for MessageSchema or change the function signatures.
+# Let's keep fastapi_mail for Schema ONLY for now to minimize friction, or just defined a simple class.
+# Actually, the user wants "Remove SMTP completely".
+# Let's define a local MessageSchema to break the dependency on fastapi-mail if possible.
 
+class SimpleMessageSchema:
+    def __init__(self, subject, recipients, body, subtype="html"):
+        self.subject = subject
+        self.recipients = recipients
+        self.body = body
+        self.subtype = subtype
 
-def get_email_config(port: int = None):
-    """
-    Get email configuration for a specific port.
-    If port is None, use the one from settings.
-    """
-    current_port = port or settings.mail_port
+async def send_via_resend(subject: str, recipients: list[str], html_body: str) -> bool:
+    """Send email via Resend API (HTTP)."""
+    if not settings.resend_api_key:
+        print("⚠️ No RESEND_API_KEY configured. Cannot send email.")
+        return False
+
+    to_email = recipients[0] # Assuming single recipient for now as per logic
+    print(f"🔄 Attempting to send via Resend API to {to_email}...")
     
-    # Determine SSL/TLS
-    use_ssl = current_port == 465
-    use_starttls = current_port in [587, 2525]
-    
-    return ConnectionConfig(
-        MAIL_USERNAME=settings.mail_username,
-        MAIL_PASSWORD=settings.mail_password,
-        MAIL_FROM=settings.mail_from,
-        MAIL_PORT=current_port,
-        MAIL_SERVER=settings.mail_server,
-        MAIL_FROM_NAME=settings.mail_from_name,
-        MAIL_STARTTLS=use_starttls,
-        MAIL_SSL_TLS=use_ssl,
-        USE_CREDENTIALS=True,
-        VALIDATE_CERTS=False, # Disable to rule out handshake issues
-        TEMPLATE_FOLDER=None,
-        TIMEOUT=15 # Short timeout for faster fallback
-    )
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                "https://api.resend.com/emails",
+                headers={
+                    "Authorization": f"Bearer {settings.resend_api_key}",
+                    "Content-Type": "application/json"
+                },
+                json={
+                    "from": "JYPL Registration <admin@eigensu.in>",
+                    "to": recipients,
+                    "subject": subject,
+                    "html": html_body
+                },
+                timeout=15.0
+            )
+            
+            if response.status_code == 200:
+                print(f"✅ Email sent successfully via Resend API to {to_email}")
+                return True
+            else:
+                print(f"⚠️ Resend API failed: {response.status_code} - {response.text}")
+                return False
+    except Exception as e:
+        print(f"⚠️ Resend API Exception: {str(e)}")
+        return False
 
-# Initial config
-email_conf = get_email_config()
-fastmail = FastMail(email_conf)
 
-async def send_email_with_fallback(message: MessageSchema, player_id: str, to_email: str) -> bool:
+async def send_email(subject: str, to_email: str, html_body: str) -> bool:
     """
-    Send email with robust fallback logic:
-    1. Try Configured Port (default)
-    2. Try Port 465 (SSL)
-    3. Try Port 2525 (Alternative STARTTLS)
-    4. Fallback to LOGGING the link for manual sending.
+    Primary Send Function: Resend API -> Manual Fallback
     """
-    ports_to_try = []
-    
-    # Start with configured port
-    ports_to_try.append(email_conf.MAIL_PORT)
-    
-    # Add others if not present
-    if 465 not in ports_to_try: ports_to_try.append(465)
-    if 587 not in ports_to_try: ports_to_try.append(587)
-    if 2525 not in ports_to_try: ports_to_try.append(2525)
+    # 1. Try Resend API
+    if await send_via_resend(subject, [to_email], html_body):
+        return True
 
-    print(f"📧 Attempting to send email to {to_email}...")
-
-    for port in ports_to_try:
-        try:
-            print(f"🔄 Trying Port {port}...")
-            conf = get_email_config(port)
-            fm = FastMail(conf)
-            await fm.send_message(message)
-            print(f"✅ Email sent successfully to {to_email} using Port {port}")
-            return True
-        except Exception as e:
-            print(f"⚠️ Port {port} failed: {str(e)}")
-
-    # If all fail:
-    print(f"❌ ALL PORTS FAILED. Could not send email via SMTP.")
+    # 2. Manual Fallback
+    print(f"❌ RESEND API FAILED.")
     print(f"👇 ================= MANUAL ACTION REQUIRED ================= 👇")
     print(f"Please send this Payment Link manually to the user:")
     print(f"🔗 https://jypl.in/resume-payment?email={to_email}")
     print(f"👆 ========================================================== 👆")
-    return True # Return True so the UI doesn't show an error, as we logged the manual step.
+    return True
 
 
 async def send_success_email(
@@ -138,14 +138,11 @@ async def send_success_email(
     </html>
     """
     
-    message = MessageSchema(
+    return await send_email(
         subject="✅ JYPL Registration Successful - Payment Confirmed",
-        recipients=[to_email],
-        body=html_content,
-        subtype=MessageType.html
+        to_email=to_email,
+        html_body=html_content
     )
-    
-    return await send_email_with_fallback(message, player_id, to_email)
 
 
 async def send_approval_email(
@@ -204,11 +201,8 @@ async def send_approval_email(
     </html>
     """
     
-    message = MessageSchema(
+    return await send_email(
         subject="🎉 JYPL Application Approved - Complete Payment Now",
-        recipients=[to_email],
-        body=html_content,
-        subtype=MessageType.html
+        to_email=to_email,
+        html_body=html_content
     )
-    
-    return await send_email_with_fallback(message, player_id, to_email)

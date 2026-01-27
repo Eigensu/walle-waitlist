@@ -26,6 +26,7 @@ import {
   adminUpdateConfig,
   approvePlayer,
   rejectPlayer,
+  adminResendEmail,
 } from "@/lib/api";
 
 interface Player {
@@ -67,6 +68,7 @@ export default function AdminDashboard() {
   const [regUpdating, setRegUpdating] = useState(false);
   const [approving, setApproving] = useState<string | null>(null);
   const [rejecting, setRejecting] = useState<string | null>(null);
+  const [sendingEmail, setSendingEmail] = useState<string | null>(null);
 
   // Pagination State
   const [page, setPage] = useState(1);
@@ -203,6 +205,35 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleResendEmail = async (player: Player) => {
+    // Only allow resending for APPROVED or PAID players
+    if (
+      player.registration_status !== "APPROVED" &&
+      player.registration_status !== "PAID"
+    ) {
+      alert("Can only resend emails to APPROVED or PAID players.");
+      return;
+    }
+
+    if (!confirm(`Resend email to ${player.first_name}?`)) return;
+
+    setSendingEmail(player.id);
+    try {
+      const credentials = localStorage.getItem("admin_credentials");
+      if (!credentials) {
+        router.push("/admin");
+        return;
+      }
+      const [username, password] = atob(credentials).split(":");
+      await adminResendEmail(player.id, username, password);
+      alert("Email resent successfully!");
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Failed to resend email");
+    } finally {
+      setSendingEmail(null);
+    }
+  };
+
   const filteredPlayers = useMemo(() => {
     if (!searchTerm) return players;
 
@@ -331,13 +362,16 @@ export default function AdminDashboard() {
           <Button
             size="sm"
             variant="outline"
-            onClick={() => {
-              window.location.href = `mailto:${props.row.email}`;
-            }}
-            title="Send Email"
+            onClick={() => handleResendEmail(props.row)}
+            disabled={!!sendingEmail}
+            title="Resend Email"
             className="border-blue-300 text-blue-700 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-400 dark:hover:bg-blue-950/30 h-7 w-7 p-0"
           >
-            <Mail className="h-3 w-3" />
+            {sendingEmail === props.row.id ? (
+              <Loader2 className="h-3 w-3 animate-spin" />
+            ) : (
+              <Mail className="h-3 w-3" />
+            )}
           </Button>
           <Button
             size="sm"

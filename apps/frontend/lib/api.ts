@@ -186,3 +186,15 @@ export async function rejectPlayer(
   });
   return handleJson<{ message: string }>(res);
 }
+
+export async function adminResendEmail(
+  playerId: string,
+  username: string,
+  pass: string,
+): Promise<{ message: string }> {
+  const url = `/api/admin/resend-email/${playerId}?username=${encodeURIComponent(username)}&password=${encodeURIComponent(pass)}`;
+  const res = await fetch(url, {
+    method: "POST",
+  });
+  return handleJson<{ message: string }>(res);
+}
