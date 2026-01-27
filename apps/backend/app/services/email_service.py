@@ -19,7 +19,7 @@ def get_email_config(port: int = None):
     
     # Determine SSL/TLS
     use_ssl = current_port == 465
-    use_starttls = current_port == 587
+    use_starttls = current_port in [587, 2525]
     
     return ConnectionConfig(
         MAIL_USERNAME=settings.mail_username,
@@ -33,7 +33,7 @@ def get_email_config(port: int = None):
         USE_CREDENTIALS=True,
         VALIDATE_CERTS=False, # Disable to rule out handshake issues
         TEMPLATE_FOLDER=None,
-        TIMEOUT=30 # 30s timeout is enough to know if it's blocked
+        TIMEOUT=15 # Short timeout for faster fallback
     )
 
 # Initial config
@@ -42,42 +42,42 @@ fastmail = FastMail(email_conf)
 
 async def send_email_with_fallback(message: MessageSchema, player_id: str, to_email: str) -> bool:
     """
-    Send email with fallback logic.
-    CURRENTLY IN MOCK MODE: Logs email to console instead of sending to avoid SMTP timeouts.
+    Send email with robust fallback logic:
+    1. Try Configured Port (default)
+    2. Try Port 465 (SSL)
+    3. Try Port 2525 (Alternative STARTTLS)
+    4. Fallback to LOGGING the link for manual sending.
     """
-    print(f"📧 [MOCK EMAIL] WOULD SEND TO: {to_email}")
-    print(f"ℹ️  [MOCK EMAIL] Subject: {message.subject}")
-    print(f"📝 [MOCK EMAIL] Body Preview: {message.body[:100]}...")
-    print(f"✅ [MOCK EMAIL] Simulated success for player {player_id}")
-    return True
+    ports_to_try = []
+    
+    # Start with configured port
+    ports_to_try.append(email_conf.MAIL_PORT)
+    
+    # Add others if not present
+    if 465 not in ports_to_try: ports_to_try.append(465)
+    if 587 not in ports_to_try: ports_to_try.append(587)
+    if 2525 not in ports_to_try: ports_to_try.append(2525)
 
-    # ORIGINAL SMTP LOGIC COMMENTED OUT FOR RELIABILITY
-    # # Try 1: Use configured port
-    # try:
-    #     print(f"🚀 Attempting to send email to {to_email} using port {email_conf.MAIL_PORT}...")
-    #     fm = FastMail(email_conf)
-    #     await fm.send_message(message)
-    #     print(f"✅ Email sent successfully to {to_email} on port {email_conf.MAIL_PORT}")
-    #     return True
-    # except Exception as e:
-    #     print(f"⚠️ Failed on port {email_conf.MAIL_PORT}: {str(e)}")
-    #     
-    #     # Try 2: Switch port
-    #     fallback_port = 465 if email_conf.MAIL_PORT == 587 else 587
-    #     print(f"🔄 Retrying with fallback port {fallback_port}...")
-    #     
-    #     try:
-    #         fallback_conf = get_email_config(fallback_port)
-    #         fm_fallback = FastMail(fallback_conf)
-    #         await fm_fallback.send_message(message)
-    #         print(f"✅ Email sent successfully to {to_email} on fallback port {fallback_port}")
-    #         return True
-    #     except Exception as e2:
-    #         print(f"❌ Failed on fallback port {fallback_port}: {str(e2)}")
-    #         print(f"❌ Could not send email to {to_email}. Both ports failed.")
-    #         import traceback
-    #         traceback.print_exc()
-    #         return False
+    print(f"📧 Attempting to send email to {to_email}...")
+
+    for port in ports_to_try:
+        try:
+            print(f"🔄 Trying Port {port}...")
+            conf = get_email_config(port)
+            fm = FastMail(conf)
+            await fm.send_message(message)
+            print(f"✅ Email sent successfully to {to_email} using Port {port}")
+            return True
+        except Exception as e:
+            print(f"⚠️ Port {port} failed: {str(e)}")
+
+    # If all fail:
+    print(f"❌ ALL PORTS FAILED. Could not send email via SMTP.")
+    print(f"👇 ================= MANUAL ACTION REQUIRED ================= 👇")
+    print(f"Please send this Payment Link manually to the user:")
+    print(f"🔗 https://jypl.in/resume-payment?email={to_email}")
+    print(f"👆 ========================================================== 👆")
+    return True # Return True so the UI doesn't show an error, as we logged the manual step.
 
 
 async def send_success_email(

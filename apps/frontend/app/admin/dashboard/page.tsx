@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Download, LogOut, Eye, X, Check } from "lucide-react";
+import { Loader2, Download, LogOut, Eye, X, Check, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -324,21 +324,34 @@ export default function AdminDashboard() {
     {
       key: "actions",
       name: "Actions",
-      width: 100,
+      width: 140,
       sortable: false,
       renderCell: (props: { row: Player }) => (
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={() => {
-            setSelectedPlayer(props.row);
-            setDetailsDialogOpen(true);
-          }}
-          className="border-blue-300 text-blue-700 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-400 dark:hover:bg-blue-950/30 h-7 text-xs w-full"
-        >
-          <Eye className="mr-1 h-3 w-3" />
-          Manage
-        </Button>
+        <div className="flex gap-1">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              window.location.href = `mailto:${props.row.email}`;
+            }}
+            title="Send Email"
+            className="border-blue-300 text-blue-700 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-400 dark:hover:bg-blue-950/30 h-7 w-7 p-0"
+          >
+            <Mail className="h-3 w-3" />
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              setSelectedPlayer(props.row);
+              setDetailsDialogOpen(true);
+            }}
+            className="border-blue-300 text-blue-700 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-400 dark:hover:bg-blue-950/30 h-7 text-xs flex-1"
+          >
+            <Eye className="mr-1 h-3 w-3" />
+            Manage
+          </Button>
+        </div>
       ),
     },
   ];
