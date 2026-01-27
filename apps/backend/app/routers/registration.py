@@ -228,7 +228,7 @@ async def update_player(
         player.visiting_card_url = await storage.save_upload(visiting_card, CARD_MIMES, MAX_FILE_BYTES)
 
     await player.save()
-    return RegisterResponse(player_id=str(player.id), message="Details Updated")
+    return RegisterResponse(player_id=str(player.id), message="Details Updated", status=player.registration_status.value)
 
 
 @router.post("/resume-payment", response_model=ResumePaymentResponse)

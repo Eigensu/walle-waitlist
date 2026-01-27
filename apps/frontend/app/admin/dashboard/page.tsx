@@ -287,7 +287,7 @@ export default function AdminDashboard() {
     {
       key: "actions",
       name: "Actions",
-      width: 100,
+      width: 200,
       sortable: false,
       renderCell: (props: { row: Player }) => (
         <div className="flex gap-2">

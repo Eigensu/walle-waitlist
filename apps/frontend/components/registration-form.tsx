@@ -80,9 +80,7 @@ export function RegistrationForm({
   const [statusMessage, setStatusMessage] = useState<StatusMessage>(null);
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>("idle");
   const [submitting, setSubmitting] = useState(false);
-  const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>("idle");
   const [registrationStatus, setRegistrationStatus] = useState<string>("PAID");
-  const [submitting, setSubmitting] = useState(false);
   const [loadingPlayerData, setLoadingPlayerData] = useState(false);
 
   // Handle resume payment - load player data and jump to payment step
