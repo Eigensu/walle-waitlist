@@ -5,6 +5,7 @@ from app.core.config import Settings
 from app.models.player import Player, RegistrationStatus
 from app.models.payment import Payment, PaymentStatus
 from app.models.config import AppConfig
+from beanie.operators import In
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
 
@@ -80,22 +81,36 @@ async def admin_login(
 async def get_all_players(
     username: str,
     password: str,
+    page: int = 1,
+    limit: int = 50,
     settings: Settings = Depends(get_settings),
 ):
-    """Get all registered players (requires authentication)."""
+    """Get registered players with pagination (requires authentication)."""
     if not verify_admin_credentials(username, password, settings):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid credentials"
         )
 
-    players = await Player.find_all().to_list()
+    # Use pagination
+    skip = (page - 1) * limit
+    
+    # Get total count
+    total = await Player.find_all().count()
+    
+    # Fetch players with pagination
+    players = await Player.find_all().skip(skip).limit(limit).sort("-created_at").to_list()
+    
+    # Optimize N+1 query: Fetch all payments for these players in one go
+    player_ids = [player.id for player in players]
+    payments = await Payment.find(In(Payment.player_id, player_ids)).to_list()
+    
+    # Create a map for O(1) lookup
+    payment_map = {payment.player_id: payment for payment in payments}
     
     result = []
     for player in players:
-        payment = await Payment.find_one(
-            Payment.player_id == player.id
-        )
+        payment = payment_map.get(player.id)
         
         result.append(
             PlayerResponse(
@@ -121,7 +136,7 @@ async def get_all_players(
             )
         )
     
-    return {"players": result, "total": len(result)}
+    return {"players": result, "total": total, "page": page, "limit": limit}
 
 
 @router.get("/players/csv")
@@ -166,14 +181,19 @@ async def export_players_csv(
         "JYPL S8 Team",
         "Registration Status",
         "Payment Status",
-        "Created At"
+        "Created At",
+        "Photo URL",
+        "Visiting Card URL"
     ])
     
+    # Optimize N+1 query for CSV export as well
+    player_ids = [player.id for player in players]
+    payments = await Payment.find(In(Payment.player_id, player_ids)).to_list()
+    payment_map = {payment.player_id: payment for payment in payments}
+
     # Write player data
     for player in players:
-        payment = await Payment.find_one(
-            Payment.player_id == player.id
-        )
+        payment = payment_map.get(player.id)
         
         writer.writerow([
             str(player.id),
@@ -195,6 +215,8 @@ async def export_players_csv(
             player.registration_status.value,
             payment.status.value if payment else "N/A",
             player.created_at.isoformat() if player.created_at else "",
+            player.photo_url,
+            player.visiting_card_url
         ])
     
     output.seek(0)

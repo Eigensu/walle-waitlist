@@ -45,6 +45,7 @@ interface Player {
   waist_size?: number;
   played_jypl_s7?: string;
   jypl_s7_team?: string;
+  sr_no?: number;
 }
 
 export default function AdminDashboard() {
@@ -64,6 +65,11 @@ export default function AdminDashboard() {
   const [regOpen, setRegOpen] = useState<boolean | null>(null);
   const [regUpdating, setRegUpdating] = useState(false);
 
+  // Pagination State
+  const [page, setPage] = useState(1);
+  const [limit] = useState(50);
+  const [total, setTotal] = useState(0);
+
   useEffect(() => {
     const fetchPlayers = async () => {
       try {
@@ -76,7 +82,7 @@ export default function AdminDashboard() {
         const [username, password] = atob(credentials).split(":");
 
         const response = await fetch(
-          `/api/admin/players?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`,
+          `/api/admin/players?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}&page=${page}&limit=${limit}`,
         );
 
         if (response.status === 401) {
@@ -91,6 +97,7 @@ export default function AdminDashboard() {
 
         const data = await response.json();
         setPlayers(data.players);
+        setTotal(data.total);
       } catch (err) {
         setError(
           err instanceof Error ? err.message : "Failed to fetch players",
@@ -101,7 +108,7 @@ export default function AdminDashboard() {
     };
 
     fetchPlayers();
-  }, [router]);
+  }, [router, page, limit]);
 
   useEffect(() => {
     const fetchConfig = async () => {
@@ -185,6 +192,7 @@ export default function AdminDashboard() {
   }, [filteredPlayers, sortColumns]);
 
   const gridColumns: Column<Player>[] = [
+    { key: "sr_no", name: "Sr. No.", width: 70, frozen: true },
     { key: "first_name", name: "First Name", sortable: true, width: 120 },
     { key: "last_name", name: "Last Name", sortable: true, width: 120 },
     { key: "email", name: "Email", sortable: true, width: 200 },
@@ -433,6 +441,32 @@ export default function AdminDashboard() {
           </Card>
         </div>
 
+        {/* Pagination Controls */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="text-sm text-slate-500 dark:text-slate-400">
+            Showing {players.length > 0 ? (page - 1) * limit + 1 : 0} to{" "}
+            {Math.min(page * limit, total)} of {total} players
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1 || loading}
+            >
+              Previous
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage((p) => p + 1)}
+              disabled={page * limit >= total || loading}
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+
         {/* Controls */}
         <div className="mb-8 flex flex-col sm:flex-row gap-4">
           <Input
@@ -526,7 +560,12 @@ export default function AdminDashboard() {
               <div className="w-full" style={{ height: "600px" }}>
                 <DataGrid
                   columns={gridColumns}
-                  rows={sortedPlayers}
+                  rows={
+                    sortedPlayers.map((p, i) => ({
+                      ...p,
+                      sr_no: (page - 1) * limit + i + 1,
+                    })) as Player[]
+                  }
                   defaultColumnOptions={{
                     sortable: true,
                     resizable: true,
