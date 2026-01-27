@@ -59,13 +59,16 @@ export type AdminConfig = { registration_open: boolean };
 async function handleJson<T>(res: Response): Promise<T> {
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
-    const detail = typeof body?.detail === "string" ? body.detail : "Request failed";
+    const detail =
+      typeof body?.detail === "string" ? body.detail : "Request failed";
     throw new Error(detail);
   }
   return res.json() as Promise<T>;
 }
 
-export async function registerPlayer(formData: FormData): Promise<RegisterResponse> {
+export async function registerPlayer(
+  formData: FormData,
+): Promise<RegisterResponse> {
   const res = await fetch("/api/register", {
     method: "POST",
     body: formData,
@@ -74,7 +77,10 @@ export async function registerPlayer(formData: FormData): Promise<RegisterRespon
   return handleJson<RegisterResponse>(res);
 }
 
-export async function updatePlayer(playerId: string, formData: FormData): Promise<RegisterResponse> {
+export async function updatePlayer(
+  playerId: string,
+  formData: FormData,
+): Promise<RegisterResponse> {
   const res = await fetch(`/api/player/${playerId}`, {
     method: "PUT",
     body: formData,
@@ -83,7 +89,9 @@ export async function updatePlayer(playerId: string, formData: FormData): Promis
   return handleJson<RegisterResponse>(res);
 }
 
-export async function createOrder(playerId: string): Promise<CreateOrderResponse> {
+export async function createOrder(
+  playerId: string,
+): Promise<CreateOrderResponse> {
   const res = await fetch("/api/payments/create-order", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -108,7 +116,9 @@ export async function verifyPayment(payload: {
   return handleJson<VerifyPaymentResponse>(res);
 }
 
-export async function resumePayment(email: string): Promise<ResumePaymentResponse> {
+export async function resumePayment(
+  email: string,
+): Promise<ResumePaymentResponse> {
   const res = await fetch("/api/resume-payment", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -118,7 +128,9 @@ export async function resumePayment(email: string): Promise<ResumePaymentRespons
   return handleJson<ResumePaymentResponse>(res);
 }
 
-export async function getPlayerDetails(playerId: string): Promise<PlayerDetailsResponse> {
+export async function getPlayerDetails(
+  playerId: string,
+): Promise<PlayerDetailsResponse> {
   const res = await fetch(`/api/player/${playerId}`);
   return handleJson<PlayerDetailsResponse>(res);
 }
@@ -128,7 +140,10 @@ export async function getPublicConfig(): Promise<PublicConfig> {
   return handleJson<PublicConfig>(res);
 }
 
-export async function adminGetConfig(username: string, password: string): Promise<AdminConfig> {
+export async function adminGetConfig(
+  username: string,
+  password: string,
+): Promise<AdminConfig> {
   const url = `/api/admin/config?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`;
   const res = await fetch(url);
   return handleJson<AdminConfig>(res);
@@ -154,6 +169,18 @@ export async function approvePlayer(
   pass: string,
 ): Promise<{ message: string }> {
   const url = `/api/admin/approve/${playerId}?username=${encodeURIComponent(username)}&password=${encodeURIComponent(pass)}`;
+  const res = await fetch(url, {
+    method: "POST",
+  });
+  return handleJson<{ message: string }>(res);
+}
+
+export async function rejectPlayer(
+  playerId: string,
+  username: string,
+  pass: string,
+): Promise<{ message: string }> {
+  const url = `/api/admin/reject/${playerId}?username=${encodeURIComponent(username)}&password=${encodeURIComponent(pass)}`;
   const res = await fetch(url, {
     method: "POST",
   });

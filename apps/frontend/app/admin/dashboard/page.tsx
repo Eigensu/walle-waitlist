@@ -21,7 +21,12 @@ import {
 } from "@/components/ui/dialog";
 import { DataGrid, type Column, type SortColumn } from "react-data-grid";
 import "react-data-grid/lib/styles.css";
-import { adminGetConfig, adminUpdateConfig, approvePlayer } from "@/lib/api";
+import {
+  adminGetConfig,
+  adminUpdateConfig,
+  approvePlayer,
+  rejectPlayer,
+} from "@/lib/api";
 
 interface Player {
   id: string;
@@ -65,6 +70,7 @@ export default function AdminDashboard() {
   const [regOpen, setRegOpen] = useState<boolean | null>(null);
   const [regUpdating, setRegUpdating] = useState(false);
   const [approving, setApproving] = useState<string | null>(null);
+  const [rejecting, setRejecting] = useState<string | null>(null);
 
   // Pagination State
   const [page, setPage] = useState(1);
@@ -174,6 +180,30 @@ export default function AdminDashboard() {
       setError(err instanceof Error ? err.message : "Failed to approve player");
     } finally {
       setApproving(null);
+    }
+  };
+
+  const handleReject = async (playerId: string) => {
+    setRejecting(playerId);
+    try {
+      const credentials = localStorage.getItem("admin_credentials");
+      if (!credentials) {
+        router.push("/admin");
+        return;
+      }
+      const [username, password] = atob(credentials).split(":");
+      await rejectPlayer(playerId, username, password);
+
+      // Update local state
+      setPlayers(
+        players.map((p) =>
+          p.id === playerId ? { ...p, registration_status: "REJECTED" } : p,
+        ),
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to reject player");
+    } finally {
+      setRejecting(null);
     }
   };
 
@@ -302,6 +332,20 @@ export default function AdminDashboard() {
                 <Loader2 className="h-3 w-3 animate-spin" />
               ) : (
                 "Approve"
+              )}
+            </Button>
+          )}
+          {props.row.registration_status === "WAITLIST" && (
+            <Button
+              size="sm"
+              onClick={() => handleReject(props.row.id)}
+              disabled={!!rejecting}
+              className="bg-red-600 text-white hover:bg-red-700 h-7 text-xs"
+            >
+              {rejecting === props.row.id ? (
+                <Loader2 className="h-3 w-3 animate-spin" />
+              ) : (
+                "Reject"
               )}
             </Button>
           )}

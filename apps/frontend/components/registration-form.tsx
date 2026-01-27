@@ -114,11 +114,31 @@ export function RegistrationForm({
         });
 
         setPlayerId(resumePlayerId);
-        setStepIndex(4); // Jump to payment step (index 4)
-        setStatusMessage({
-          kind: "success",
-          text: "Welcome back! Complete your payment to finish registration.",
-        });
+
+        if (
+          playerData.registration_status === "WAITLIST" ||
+          playerData.registration_status === "REJECTED"
+        ) {
+          setRegistrationStatus(playerData.registration_status);
+          setStepIndex(5); // Confirmation step (index 5)
+          setStatusMessage({
+            kind:
+              playerData.registration_status === "REJECTED"
+                ? "error"
+                : "success",
+            text:
+              playerData.registration_status === "REJECTED"
+                ? "Your registration has been rejected."
+                : "Welcome back! You are on the waitlist.",
+          });
+        } else {
+          setRegistrationStatus("PAID");
+          setStepIndex(4); // Jump to payment step (index 4)
+          setStatusMessage({
+            kind: "success",
+            text: "Welcome back! Complete your payment to finish registration.",
+          });
+        }
       } catch (error) {
         setStatusMessage({
           kind: "error",

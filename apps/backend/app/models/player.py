@@ -10,6 +10,7 @@ from pydantic.config import ConfigDict
 class RegistrationStatus(str, Enum):
     WAITLIST = "WAITLIST"
     APPROVED = "APPROVED"
+    REJECTED = "REJECTED"
     PENDING_PAYMENT = "PENDING_PAYMENT"
     PAID = "PAID"
     FAILED = "FAILED"
