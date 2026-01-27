@@ -47,7 +47,12 @@ export type PlayerDetailsResponse = {
   registration_status: string;
 };
 
-export type PublicConfig = { registration_open: boolean };
+export type PublicConfig = {
+  registration_open: boolean;
+  registration_cap_reached: boolean;
+  current_registrations: number;
+  registration_cap: number;
+};
 export type AdminConfig = { registration_open: boolean };
 
 async function handleJson<T>(res: Response): Promise<T> {

@@ -1,30 +1,58 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
+import { Loader2 } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { RegistrationForm } from "@/components/registration-form";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { SponsorStrip } from "@/components/sponsor-strip";
-import { getPublicConfig } from "@/lib/api";
+import { getPublicConfig, resumePayment, type PublicConfig } from "@/lib/api";
 
 export default function RegisterPage() {
-  const [regOpen, setRegOpen] = useState<boolean | null>(null);
+  const [config, setConfig] = useState<PublicConfig | null>(null);
+  const [resumeEmail, setResumeEmail] = useState("");
+  const [resumeLoading, setResumeLoading] = useState(false);
+  const [resumeError, setResumeError] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const loadConfig = async () => {
       try {
         const cfg = await getPublicConfig();
-        setRegOpen(cfg.registration_open);
-      } catch (e) {
+        setConfig(cfg);
+      } catch {
         // If config fails, default to showing the form to avoid blocking
-        setRegOpen(true);
+        setConfig({
+          registration_open: true,
+          registration_cap_reached: false,
+          current_registrations: 0,
+          registration_cap: 174,
+        });
       }
     };
     loadConfig();
   }, []);
+
+  const handleResumePayment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setResumeError(null);
+    setResumeLoading(true);
+
+    try {
+      const result = await resumePayment(resumeEmail);
+      // Navigate to same page with player ID to resume payment
+      router.push(`/register?resume=${result.player_id}`);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Unable to find registration";
+      setResumeError(message);
+    } finally {
+      setResumeLoading(false);
+    }
+  };
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-blue-50 via-white to-indigo-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900">
       {/* Theme Toggle Button */}
@@ -81,11 +109,11 @@ export default function RegisterPage() {
             </div>
 
             {/* Registration Status Pill */}
-            {regOpen !== null && (
+            {config !== null && (
               <div
                 className={
                   `inline-flex items-center gap-2 rounded-full px-3 py-1 text-[10px] sm:text-xs font-semibold uppercase tracking-[0.12em] shadow-sm ` +
-                  (regOpen
+                  (config.registration_open && !config.registration_cap_reached
                     ? "bg-green-100/90 text-green-800 dark:bg-green-900/50 dark:text-green-300"
                     : "bg-red-100/90 text-red-800 dark:bg-red-900/50 dark:text-red-300")
                 }
@@ -93,10 +121,14 @@ export default function RegisterPage() {
                 <div
                   className={
                     `h-1.5 w-1.5 animate-pulse rounded-full ` +
-                    (regOpen ? "bg-green-600" : "bg-red-600")
+                    (config.registration_open && !config.registration_cap_reached ? "bg-green-600" : "bg-red-600")
                   }
                 ></div>
-                {regOpen ? "Registration Open" : "Registration Closed"}
+                {config.registration_cap_reached
+                  ? `Registration Full (${config.current_registrations}/${config.registration_cap})`
+                  : config.registration_open
+                    ? "Registration Open"
+                    : "Registration Closed"}
               </div>
             )}
           </div>
@@ -116,7 +148,7 @@ export default function RegisterPage() {
 
         <Card className="border-2 border-blue-200 bg-white/95 shadow-2xl shadow-blue-100/60 backdrop-blur dark:border-slate-700 dark:bg-slate-800/90 dark:shadow-none">
           <CardContent className="p-6 sm:p-8 space-y-3">
-            {regOpen === false ? (
+            {config && !config.registration_open ? (
               <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-6 text-center text-slate-800 dark:border-yellow-900/40 dark:bg-yellow-950/20 dark:text-yellow-200">
                 <p className="text-lg font-semibold">
                   Registration is currently closed
@@ -124,6 +156,70 @@ export default function RegisterPage() {
                 <p className="mt-1 text-sm">
                   Please check back later or contact the organizers for updates.
                 </p>
+              </div>
+            ) : config && config.registration_cap_reached ? (
+              <div className="space-y-4">
+                <div className="rounded-lg border border-orange-200 bg-orange-50 p-6 text-center text-slate-800 dark:border-orange-900/40 dark:bg-orange-950/20 dark:text-orange-200">
+                  <p className="text-lg font-semibold">
+                    Registration has reached maximum capacity
+                  </p>
+                  <p className="mt-1 text-sm">
+                    We have reached the maximum of {config.registration_cap} registrations.
+                  </p>
+                </div>
+
+                {/* Resume Payment Section */}
+                <div className="rounded-lg border border-amber-200 bg-amber-50 p-6 dark:border-amber-900/40 dark:bg-amber-950/20">
+                  <div className="mb-4 text-center">
+                    <h3 className="text-lg font-semibold text-amber-900 dark:text-amber-100">
+                      Already Registered?
+                    </h3>
+                    <p className="mt-1 text-sm text-amber-700 dark:text-amber-300">
+                      Complete your payment to finalize your registration
+                    </p>
+                  </div>
+
+                  <form onSubmit={handleResumePayment} className="space-y-3">
+                    <div>
+                      <label
+                        htmlFor="resume-email"
+                        className="block text-sm font-medium text-amber-900 dark:text-amber-200 mb-1"
+                      >
+                        Enter your registered email
+                      </label>
+                      <input
+                        id="resume-email"
+                        type="email"
+                        required
+                        value={resumeEmail}
+                        onChange={(e) => setResumeEmail(e.target.value)}
+                        placeholder="your.email@example.com"
+                        className="w-full rounded-lg border border-amber-300 dark:border-amber-700 bg-white dark:bg-slate-800 px-4 py-3 text-amber-900 dark:text-white placeholder:text-amber-400 dark:placeholder:text-amber-600 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+                      />
+                    </div>
+
+                    {resumeError && (
+                      <div className="rounded-lg border border-red-300 bg-red-50 dark:bg-red-950/30 px-4 py-2 text-sm text-red-700 dark:text-red-300">
+                        {resumeError}
+                      </div>
+                    )}
+
+                    <button
+                      type="submit"
+                      disabled={resumeLoading}
+                      className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-amber-600 px-6 py-3 text-base font-semibold text-white shadow-md hover:bg-amber-700 disabled:bg-amber-400 disabled:cursor-not-allowed transition"
+                    >
+                      {resumeLoading ? (
+                        <>
+                          <Loader2 className="h-5 w-5 animate-spin" />
+                          <span>Checking...</span>
+                        </>
+                      ) : (
+                        <span>Continue to Payment</span>
+                      )}
+                    </button>
+                  </form>
+                </div>
               </div>
             ) : (
               <Suspense

@@ -4,10 +4,10 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Loader2 } from "lucide-react";
-import { getPublicConfig, resumePayment } from "@/lib/api";
+import { getPublicConfig, resumePayment, type PublicConfig } from "@/lib/api";
 
 export default function Home() {
-  const [regOpen, setRegOpen] = useState<boolean | null>(null);
+  const [config, setConfig] = useState<PublicConfig | null>(null);
   const [resumeEmail, setResumeEmail] = useState("");
   const [resumeLoading, setResumeLoading] = useState(false);
   const [resumeError, setResumeError] = useState<string | null>(null);
@@ -17,10 +17,10 @@ export default function Home() {
     const load = async () => {
       try {
         const cfg = await getPublicConfig();
-        setRegOpen(cfg.registration_open);
+        setConfig(cfg);
       } catch {
         // If fetch fails, leave as null to avoid misleading UI
-        setRegOpen(null);
+        setConfig(null);
       }
     };
     load();
@@ -80,7 +80,7 @@ export default function Home() {
               <div
                 className={
                   `inline-flex items-center gap-2 self-start rounded-full px-4 py-2 lg:px-5 lg:py-2.5 ` +
-                  (regOpen === false
+                  (config && (!config.registration_open || config.registration_cap_reached)
                     ? "bg-red-100 dark:bg-red-900/40"
                     : "bg-blue-100 dark:bg-blue-900/40")
                 }
@@ -88,7 +88,7 @@ export default function Home() {
                 <div
                   className={
                     `h-2 w-2 lg:h-2.5 lg:w-2.5 animate-pulse rounded-full ` +
-                    (regOpen === false
+                    (config && (!config.registration_open || config.registration_cap_reached)
                       ? "bg-red-600 dark:bg-red-400"
                       : "bg-blue-600 dark:bg-blue-400")
                   }
@@ -96,14 +96,16 @@ export default function Home() {
                 <span
                   className={
                     `text-xs lg:text-sm font-semibold uppercase tracking-[0.15em] ` +
-                    (regOpen === false
+                    (config && (!config.registration_open || config.registration_cap_reached)
                       ? "text-red-900 dark:text-red-200"
                       : "text-blue-900 dark:text-blue-200")
                   }
                 >
-                  {regOpen === false
-                    ? "Registration Closed"
-                    : "Registration Open"}
+                  {config && config.registration_cap_reached
+                    ? `Registration Full (${config.current_registrations}/${config.registration_cap})`
+                    : config && !config.registration_open
+                      ? "Registration Closed"
+                      : "Registration Open"}
                 </span>
               </div>
               <h2 className="text-4xl font-bold leading-tight text-blue-900 dark:text-white sm:text-5xl lg:text-6xl xl:text-7xl">

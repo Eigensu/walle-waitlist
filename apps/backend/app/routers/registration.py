@@ -95,11 +95,20 @@ async def register_player(
     if len(digit_only_phone) < 10:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Phone must have at least 10 digits")
 
-    # Duplicate checks
+    # Duplicate checks - do these before cap check to avoid confusion
     if await Player.find_one(Player.email == email):
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already registered")
     if await Player.find_one(Player.phone == phone):
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Phone already registered")
+
+    # Check registration cap
+    registration_cap = cfg.registration_cap if cfg else 174
+    current_count = await Player.count()
+    if current_count >= registration_cap:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Registration has reached maximum capacity of {registration_cap} players"
+        )
 
     photo_url = await storage.save_upload(photo, PHOTO_MIMES, MAX_FILE_BYTES)
     card_url = await storage.save_upload(visiting_card, CARD_MIMES, MAX_FILE_BYTES)
@@ -292,13 +301,21 @@ async def get_player_details(player_id: str):
 
 class PublicConfigResponse(BaseModel):
     registration_open: bool
+    registration_cap_reached: bool
+    current_registrations: int
+    registration_cap: int
 
 
 @router.get("/config", response_model=PublicConfigResponse)
 async def get_public_config():
     """Public endpoint: expose registration open/closed status for frontend."""
     cfg = await AppConfig.find_one({})
-    if cfg is None:
-        # default open
-        return PublicConfigResponse(registration_open=True)
-    return PublicConfigResponse(registration_open=cfg.registration_open)
+    registration_cap = cfg.registration_cap if cfg else 174
+    current_count = await Player.count()
+    
+    return PublicConfigResponse(
+        registration_open=cfg.registration_open if cfg else True,
+        registration_cap_reached=current_count >= registration_cap,
+        current_registrations=current_count,
+        registration_cap=registration_cap
+    )
