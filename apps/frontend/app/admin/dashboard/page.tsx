@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Download, LogOut, Eye, Edit2, X, Check } from "lucide-react";
+import { Loader2, Download, LogOut, Eye, X, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -63,10 +63,6 @@ export default function AdminDashboard() {
   const [sortColumns, setSortColumns] = useState<readonly SortColumn[]>([]);
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
-  const [editingPayment, setEditingPayment] = useState(false);
-  const [paymentAmount, setPaymentAmount] = useState<string>("");
-  const [paymentUpdating, setPaymentUpdating] = useState(false);
-  const [paymentError, setPaymentError] = useState("");
   const [regOpen, setRegOpen] = useState<boolean | null>(null);
   const [regUpdating, setRegUpdating] = useState(false);
   const [approving, setApproving] = useState<string | null>(null);
@@ -311,7 +307,18 @@ export default function AdminDashboard() {
       width: 130,
       renderCell: (props: { row: Player }) =>
         props.row.created_at
-          ? new Date(props.row.created_at).toLocaleDateString()
+          ? new Date(
+              props.row.created_at.endsWith("Z")
+                ? props.row.created_at
+                : props.row.created_at + "Z",
+            ).toLocaleString("en-IN", {
+              timeZone: "Asia/Kolkata",
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            })
           : "—",
     },
     {
@@ -335,69 +342,6 @@ export default function AdminDashboard() {
       ),
     },
   ];
-
-  const handleUpdatePaymentAmount = async () => {
-    if (!selectedPlayer || !paymentAmount) {
-      setPaymentError("Payment amount is required");
-      return;
-    }
-
-    const amount = parseFloat(paymentAmount);
-    if (isNaN(amount) || amount <= 0) {
-      setPaymentError("Please enter a valid amount");
-      return;
-    }
-
-    setPaymentUpdating(true);
-    setPaymentError("");
-
-    try {
-      const credentials = localStorage.getItem("admin_credentials");
-      if (!credentials) {
-        router.push("/admin");
-        return;
-      }
-
-      const [username, password] = atob(credentials).split(":");
-
-      const response = await fetch(
-        `/api/admin/players/${selectedPlayer.id}/payment?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ payment_amount: amount }),
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to update payment amount");
-      }
-
-      // Update the selected player locally
-      setSelectedPlayer({
-        ...selectedPlayer,
-        payment_amount: amount,
-      });
-
-      // Update players list
-      setPlayers(
-        players.map((p) =>
-          p.id === selectedPlayer.id ? { ...p, payment_amount: amount } : p,
-        ),
-      );
-
-      setEditingPayment(false);
-      setPaymentAmount("");
-    } catch (err) {
-      setPaymentError(
-        err instanceof Error ? err.message : "Failed to update payment amount",
-      );
-    } finally {
-      setPaymentUpdating(false);
-    }
-  };
 
   const handleExportCSV = async () => {
     try {
@@ -469,6 +413,91 @@ export default function AdminDashboard() {
             Logout
           </Button>
         </div>
+
+        {/* Pending Approvals Section */}
+        {players.some((p) => p.registration_status === "WAITLIST") && (
+          <Card className="mb-8 border-yellow-200 bg-yellow-50/50 dark:border-yellow-900/40 dark:bg-yellow-950/20">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-yellow-800 dark:text-yellow-400">
+                <Loader2 className="h-5 w-5 animate-spin" />
+                Pending Approvals
+              </CardTitle>
+              <CardDescription className="text-yellow-700 dark:text-yellow-500">
+                The following players are waiting for approval.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {players
+                  .filter((p) => p.registration_status === "WAITLIST")
+                  .map((player) => (
+                    <Card
+                      key={player.id}
+                      className="border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800"
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex justify-between items-start mb-4">
+                          <div>
+                            <h4 className="font-semibold text-slate-900 dark:text-white">
+                              {player.first_name} {player.last_name}
+                            </h4>
+                            <p className="text-sm text-slate-500 dark:text-slate-400">
+                              {player.email}
+                            </p>
+                          </div>
+                          <span className="text-xs text-slate-400">
+                            {player.created_at
+                              ? new Date(
+                                  player.created_at.endsWith("Z")
+                                    ? player.created_at
+                                    : player.created_at + "Z",
+                                ).toLocaleTimeString("en-IN", {
+                                  timeZone: "Asia/Kolkata",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })
+                              : ""}
+                          </span>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            onClick={() => handleApprove(player.id)}
+                            disabled={!!approving || !!rejecting}
+                            className="bg-green-600 text-white hover:bg-green-700 flex-1 h-8 text-xs"
+                          >
+                            {approving === player.id ? (
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                            ) : (
+                              <>
+                                <Check className="mr-1 h-3 w-3" />
+                                Approve
+                              </>
+                            )}
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={() => handleReject(player.id)}
+                            disabled={!!approving || !!rejecting}
+                            className="bg-red-600 text-white hover:bg-red-700 flex-1 h-8 text-xs"
+                          >
+                            {rejecting === player.id ? (
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                            ) : (
+                              <>
+                                <X className="mr-1 h-3 w-3" />
+                                Reject
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Stats and Export */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
@@ -898,164 +927,31 @@ export default function AdminDashboard() {
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                    <span className="text-sm font-medium text-slate-500 dark:text-slate-400">
                       Registered At
-                    </p>
+                    </span>
                     <p className="mt-1 text-slate-900 dark:text-white">
                       {selectedPlayer.created_at
-                        ? new Date(selectedPlayer.created_at).toLocaleString()
+                        ? new Date(
+                            selectedPlayer.created_at.endsWith("Z")
+                              ? selectedPlayer.created_at
+                              : selectedPlayer.created_at + "Z",
+                          ).toLocaleString("en-IN", {
+                            timeZone: "Asia/Kolkata",
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })
                         : "—"}
                     </p>
                   </div>
                 </div>
               </div>
 
-              {/* Payment Amount Editor */}
-              <div className="border-t border-slate-200 dark:border-slate-700 pt-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
-                    Payment Amount
-                  </h3>
-                  {!editingPayment && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        setEditingPayment(true);
-                        setPaymentAmount(
-                          selectedPlayer.payment_amount?.toString() || "0",
-                        );
-                        setPaymentError("");
-                      }}
-                      className="border-blue-300 text-blue-700 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-400 dark:hover:bg-blue-950/30"
-                    >
-                      <Edit2 className="mr-1 h-3 w-3" />
-                      Edit
-                    </Button>
-                  )}
-                </div>
-
-                {editingPayment ? (
-                  <div className="space-y-3">
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                        Amount (₹)
-                      </label>
-                      <Input
-                        type="number"
-                        value={paymentAmount}
-                        onChange={(e) => {
-                          setPaymentAmount(e.target.value);
-                          setPaymentError("");
-                        }}
-                        placeholder="Enter payment amount"
-                        step="0.01"
-                        min="0"
-                        className="h-10 rounded-lg border-slate-200 bg-white/80 px-4 text-slate-900 placeholder:text-slate-400 shadow-sm focus-visible:border-blue-400 focus-visible:ring-blue-200 dark:border-slate-600 dark:bg-slate-700/50 dark:text-white dark:placeholder:text-slate-400 dark:focus-visible:border-blue-500 dark:focus-visible:ring-blue-900/40"
-                      />
-                    </div>
-
-                    {paymentError && (
-                      <div className="rounded-lg border-2 border-red-200 bg-red-50 p-3 text-sm text-red-900 dark:border-red-900/40 dark:bg-red-950/20 dark:text-red-400">
-                        {paymentError}
-                      </div>
-                    )}
-
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        onClick={handleUpdatePaymentAmount}
-                        disabled={paymentUpdating}
-                        className="bg-blue-600 text-white hover:bg-blue-700"
-                      >
-                        {paymentUpdating ? (
-                          <>
-                            <Loader2 className="mr-1 h-3 w-3 animate-spin" />
-                            Updating...
-                          </>
-                        ) : (
-                          <>
-                            <Check className="mr-1 h-3 w-3" />
-                            Save
-                          </>
-                        )}
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          setEditingPayment(false);
-                          setPaymentAmount("");
-                          setPaymentError("");
-                        }}
-                        disabled={paymentUpdating}
-                        className="border-slate-300 text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
-                      >
-                        <X className="mr-1 h-3 w-3" />
-                        Cancel
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="rounded-lg bg-slate-100 dark:bg-slate-800 p-4">
-                    <p className="text-2xl font-bold text-slate-900 dark:text-white">
-                      ₹{" "}
-                      {(selectedPlayer.payment_amount || 0).toLocaleString(
-                        "en-IN",
-                        {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        },
-                      )}
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              {/* Actions Section */}
-              {selectedPlayer.registration_status === "WAITLIST" && (
-                <div className="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/50">
-                  <h3 className="text-lg font-semibold mb-4 text-slate-900 dark:text-white">
-                    Actions
-                  </h3>
-                  <div className="flex gap-3">
-                    <Button
-                      onClick={() => handleApprove(selectedPlayer.id)}
-                      disabled={!!approving || !!rejecting}
-                      className="bg-green-600 text-white hover:bg-green-700 flex-1"
-                    >
-                      {approving === selectedPlayer.id ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Approving...
-                        </>
-                      ) : (
-                        <>
-                          <Check className="mr-2 h-4 w-4" />
-                          Approve Registration
-                        </>
-                      )}
-                    </Button>
-                    <Button
-                      onClick={() => handleReject(selectedPlayer.id)}
-                      disabled={!!approving || !!rejecting}
-                      className="bg-red-600 text-white hover:bg-red-700 flex-1"
-                    >
-                      {rejecting === selectedPlayer.id ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Rejecting...
-                        </>
-                      ) : (
-                        <>
-                          <X className="mr-2 h-4 w-4" />
-                          Reject Application
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                </div>
-              )}
+              <div className="border-t border-slate-200 dark:border-slate-700 pt-6"></div>
+              {/* Actions Section Removed */}
             </div>
           )}
         </DialogContent>
