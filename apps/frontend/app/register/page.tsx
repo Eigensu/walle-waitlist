@@ -13,10 +13,6 @@ import { getPublicConfig, resumePayment, type PublicConfig } from "@/lib/api";
 
 export default function RegisterPage() {
   const [config, setConfig] = useState<PublicConfig | null>(null);
-  const [resumeEmail, setResumeEmail] = useState("");
-  const [resumeLoading, setResumeLoading] = useState(false);
-  const [resumeError, setResumeError] = useState<string | null>(null);
-  const router = useRouter();
 
   useEffect(() => {
     const loadConfig = async () => {
@@ -36,23 +32,6 @@ export default function RegisterPage() {
     loadConfig();
   }, []);
 
-  const handleResumePayment = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setResumeError(null);
-    setResumeLoading(true);
-
-    try {
-      const result = await resumePayment(resumeEmail);
-      // Navigate to same page with player ID to resume payment
-      router.push(`/register?resume=${result.player_id}`);
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Unable to find registration";
-      setResumeError(message);
-    } finally {
-      setResumeLoading(false);
-    }
-  };
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-blue-50 via-white to-indigo-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900">
       {/* Theme Toggle Button */}
@@ -121,7 +100,10 @@ export default function RegisterPage() {
                 <div
                   className={
                     `h-1.5 w-1.5 animate-pulse rounded-full ` +
-                    (config.registration_open && !config.registration_cap_reached ? "bg-green-600" : "bg-red-600")
+                    (config.registration_open &&
+                    !config.registration_cap_reached
+                      ? "bg-green-600"
+                      : "bg-red-600")
                   }
                 ></div>
                 {config.registration_cap_reached
@@ -148,90 +130,15 @@ export default function RegisterPage() {
 
         <Card className="border-2 border-blue-200 bg-white/95 shadow-2xl shadow-blue-100/60 backdrop-blur dark:border-slate-700 dark:bg-slate-800/90 dark:shadow-none">
           <CardContent className="p-6 sm:p-8 space-y-3">
-            {config && !config.registration_open ? (
-              <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-6 text-center text-slate-800 dark:border-yellow-900/40 dark:bg-yellow-950/20 dark:text-yellow-200">
-                <p className="text-lg font-semibold">
-                  Registration is currently closed
-                </p>
-                <p className="mt-1 text-sm">
-                  Please check back later or contact the organizers for updates.
-                </p>
-              </div>
-            ) : config && config.registration_cap_reached ? (
-              <div className="space-y-4">
-                <div className="rounded-lg border border-orange-200 bg-orange-50 p-6 text-center text-slate-800 dark:border-orange-900/40 dark:bg-orange-950/20 dark:text-orange-200">
-                  <p className="text-lg font-semibold">
-                    Registration has reached maximum capacity
-                  </p>
-                  <p className="mt-1 text-sm">
-                    We have reached the maximum of {config.registration_cap} registrations.
-                  </p>
+            <Suspense
+              fallback={
+                <div className="text-center text-sm text-slate-500">
+                  Loading...
                 </div>
-
-                {/* Resume Payment Section */}
-                <div className="rounded-lg border border-amber-200 bg-amber-50 p-6 dark:border-amber-900/40 dark:bg-amber-950/20">
-                  <div className="mb-4 text-center">
-                    <h3 className="text-lg font-semibold text-amber-900 dark:text-amber-100">
-                      Already Registered?
-                    </h3>
-                    <p className="mt-1 text-sm text-amber-700 dark:text-amber-300">
-                      Complete your payment to finalize your registration
-                    </p>
-                  </div>
-
-                  <form onSubmit={handleResumePayment} className="space-y-3">
-                    <div>
-                      <label
-                        htmlFor="resume-email"
-                        className="block text-sm font-medium text-amber-900 dark:text-amber-200 mb-1"
-                      >
-                        Enter your registered email
-                      </label>
-                      <input
-                        id="resume-email"
-                        type="email"
-                        required
-                        value={resumeEmail}
-                        onChange={(e) => setResumeEmail(e.target.value)}
-                        placeholder="your.email@example.com"
-                        className="w-full rounded-lg border border-amber-300 dark:border-amber-700 bg-white dark:bg-slate-800 px-4 py-3 text-amber-900 dark:text-white placeholder:text-amber-400 dark:placeholder:text-amber-600 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
-                      />
-                    </div>
-
-                    {resumeError && (
-                      <div className="rounded-lg border border-red-300 bg-red-50 dark:bg-red-950/30 px-4 py-2 text-sm text-red-700 dark:text-red-300">
-                        {resumeError}
-                      </div>
-                    )}
-
-                    <button
-                      type="submit"
-                      disabled={resumeLoading}
-                      className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-amber-600 px-6 py-3 text-base font-semibold text-white shadow-md hover:bg-amber-700 disabled:bg-amber-400 disabled:cursor-not-allowed transition"
-                    >
-                      {resumeLoading ? (
-                        <>
-                          <Loader2 className="h-5 w-5 animate-spin" />
-                          <span>Checking...</span>
-                        </>
-                      ) : (
-                        <span>Continue to Payment</span>
-                      )}
-                    </button>
-                  </form>
-                </div>
-              </div>
-            ) : (
-              <Suspense
-                fallback={
-                  <div className="text-center text-sm text-slate-500">
-                    Loading registration form…
-                  </div>
-                }
-              >
-                <RegistrationFormWrapper />
-              </Suspense>
-            )}
+              }
+            >
+              <RegisterContent config={config} />
+            </Suspense>
             <p className="mt-10 text-center text-xs text-slate-500 dark:text-slate-400">
               By registering, you agree to our{" "}
               <a
@@ -256,8 +163,131 @@ export default function RegisterPage() {
   );
 }
 
-function RegistrationFormWrapper() {
+function RegisterContent({ config }: { config: PublicConfig | null }) {
   const searchParams = useSearchParams();
   const resumePlayerId = searchParams.get("resume");
-  return <RegistrationForm resumePlayerId={resumePlayerId} />;
+  const router = useRouter();
+
+  const [resumeEmail, setResumeEmail] = useState("");
+  const [resumeLoading, setResumeLoading] = useState(false);
+  const [resumeError, setResumeError] = useState<string | null>(null);
+
+  const handleResumePayment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setResumeError(null);
+    setResumeLoading(true);
+
+    try {
+      const result = await resumePayment(resumeEmail);
+      // Navigate to same page with player ID to resume payment
+      router.push(`/register?resume=${result.player_id}`);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Unable to find registration";
+      setResumeError(message);
+    } finally {
+      setResumeLoading(false);
+    }
+  };
+
+  // 1. If looking to resume payment (has ID), ALWAYS show form regardless of config
+  if (resumePlayerId) {
+    return <RegistrationForm resumePlayerId={resumePlayerId} />;
+  }
+
+  // 2. If config not loaded yet, wait
+  if (!config) {
+    return (
+      <div className="flex justify-center py-10">
+        <Loader2 className="h-8 w-8 animate-spin text-slate-300" />
+      </div>
+    );
+  }
+
+  // 3. If registration is closed
+  if (!config.registration_open) {
+    return (
+      <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-6 text-center text-slate-800 dark:border-yellow-900/40 dark:bg-yellow-950/20 dark:text-yellow-200">
+        <p className="text-lg font-semibold">
+          Registration is currently closed
+        </p>
+        <p className="mt-1 text-sm">
+          Please check back later or contact the organizers for updates.
+        </p>
+      </div>
+    );
+  }
+
+  // 4. If cap reached
+  if (config.registration_cap_reached) {
+    return (
+      <div className="space-y-4">
+        <div className="rounded-lg border border-orange-200 bg-orange-50 p-6 text-center text-slate-800 dark:border-orange-900/40 dark:bg-orange-950/20 dark:text-orange-200">
+          <p className="text-lg font-semibold">
+            Registration has reached maximum capacity
+          </p>
+          <p className="mt-1 text-sm">
+            We have reached the maximum of {config.registration_cap}{" "}
+            registrations.
+          </p>
+        </div>
+
+        {/* Resume Payment Section */}
+        <div className="rounded-lg border border-amber-200 bg-amber-50 p-6 dark:border-amber-900/40 dark:bg-amber-950/20">
+          <div className="mb-4 text-center">
+            <h3 className="text-lg font-semibold text-amber-900 dark:text-amber-100">
+              Already Registered?
+            </h3>
+            <p className="mt-1 text-sm text-amber-700 dark:text-amber-300">
+              Complete your payment to finalize your registration
+            </p>
+          </div>
+
+          <form onSubmit={handleResumePayment} className="space-y-3">
+            <div>
+              <label
+                htmlFor="resume-email"
+                className="block text-sm font-medium text-amber-900 dark:text-amber-200 mb-1"
+              >
+                Enter your registered email
+              </label>
+              <input
+                id="resume-email"
+                type="email"
+                required
+                value={resumeEmail}
+                onChange={(e) => setResumeEmail(e.target.value)}
+                placeholder="your.email@example.com"
+                className="w-full rounded-lg border border-amber-300 dark:border-amber-700 bg-white dark:bg-slate-800 px-4 py-3 text-amber-900 dark:text-white placeholder:text-amber-400 dark:placeholder:text-amber-600 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+              />
+            </div>
+
+            {resumeError && (
+              <div className="rounded-lg border border-red-300 bg-red-50 dark:bg-red-950/30 px-4 py-2 text-sm text-red-700 dark:text-red-300">
+                {resumeError}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={resumeLoading}
+              className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-amber-600 px-6 py-3 text-base font-semibold text-white shadow-md hover:bg-amber-700 disabled:bg-amber-400 disabled:cursor-not-allowed transition"
+            >
+              {resumeLoading ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  <span>Checking...</span>
+                </>
+              ) : (
+                <span>Continue to Payment</span>
+              )}
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
+  // 5. Default: Show registration form
+  return <RegistrationForm />;
 }

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status, BackgroundTasks
 from pydantic import BaseModel
 from beanie import PydanticObjectId
 
@@ -121,6 +121,7 @@ async def verify_payment(
 @router.post("/webhook")
 async def razorpay_webhook(
     request: Request,
+    background_tasks: BackgroundTasks,
     settings: Settings = Depends(get_settings),
     razorpay: RazorpayService = Depends(get_razorpay),
 ):
@@ -188,7 +189,8 @@ async def razorpay_webhook(
             amount_inr = payment.amount // 100  # Convert paise to rupees
             
             # Send email asynchronously (non-blocking)
-            await send_success_email(
+            background_tasks.add_task(
+                send_success_email,
                 to_email=player.email,
                 name=full_name,
                 player_id=str(player.id),

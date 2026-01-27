@@ -6,18 +6,37 @@ from app.core.config import get_settings
 settings = get_settings()
 
 # Email Configuration
+# Force use of port 465 (SSL) for Gmail if currently configured for 587 (STARTTLS)
+# This fixes common timeout issues in certain environments
+mail_port = settings.mail_port
+mail_server = settings.mail_server
+use_ssl = False
+use_starttls = False
+
+if "smtp.gmail.com" in mail_server and mail_port == 587:
+    print("⚠️ Detected Gmail on port 587. Forcing switch to port 465 (SSL) to avoid timeouts.")
+    mail_port = 465
+
+if mail_port == 465:
+    use_ssl = True
+    use_starttls = False
+elif mail_port == 587:
+    use_ssl = False
+    use_starttls = True
+
 email_conf = ConnectionConfig(
     MAIL_USERNAME=settings.mail_username,
     MAIL_PASSWORD=settings.mail_password,
     MAIL_FROM=settings.mail_from,
-    MAIL_PORT=settings.mail_port,
-    MAIL_SERVER=settings.mail_server,
+    MAIL_PORT=mail_port,
+    MAIL_SERVER=mail_server,
     MAIL_FROM_NAME=settings.mail_from_name,
-    MAIL_STARTTLS=True,
-    MAIL_SSL_TLS=False,
+    MAIL_STARTTLS=use_starttls,
+    MAIL_SSL_TLS=use_ssl,
     USE_CREDENTIALS=True,
     VALIDATE_CERTS=True,
-    TEMPLATE_FOLDER=None  # We'll use inline HTML
+    TEMPLATE_FOLDER=None,  # We'll use inline HTML
+    TIMEOUT=10 # Set timeout to 10 seconds
 )
 
 fastmail = FastMail(email_conf)
