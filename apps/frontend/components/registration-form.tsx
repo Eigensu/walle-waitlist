@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Loader2 } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 
 import { PaymentModal } from "@/components/payment-modal";
@@ -72,6 +73,9 @@ export function RegistrationForm({
       visiting_card: null,
     },
   });
+
+  const router = useRouter(); // Initialized useRouter
+  const searchParams = useSearchParams(); // Initialized useSearchParams
 
   const [stepIndex, setStepIndex] = useState(0);
   const [playerId, setPlayerId] = useState<string | null>(null);
@@ -661,10 +665,10 @@ export function RegistrationForm({
             {currentStepId === "done" && (
               <Button
                 type="button"
-                onClick={resetForm}
+                onClick={() => router.push("/")}
                 className="bg-blue-600 text-white hover:bg-blue-700 shadow-md shadow-blue-200 dark:shadow-none"
               >
-                Register Another Player
+                Go to Home
               </Button>
             )}
           </div>

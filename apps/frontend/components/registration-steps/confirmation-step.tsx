@@ -15,7 +15,7 @@ export function ConfirmationStep({ playerId, status }: ConfirmationStepProps) {
     textBody: "text-green-700 dark:text-white",
     textId: "text-green-600 dark:text-white",
     title: "Payment Confirmed!",
-    body: "Thank you for registering with Walle Arena. Your payment for JYPL SEASON 9 is received.",
+    body: "Thank you for registering with Walle Arena. Your payment for JYPL SEASON 9 is received. You will receive an email confirmation shortly.",
   };
 
   if (isWaitlist) {

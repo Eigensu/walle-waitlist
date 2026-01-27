@@ -317,51 +317,21 @@ export default function AdminDashboard() {
     {
       key: "actions",
       name: "Actions",
-      width: 200,
+      width: 100,
       sortable: false,
       renderCell: (props: { row: Player }) => (
-        <div className="flex gap-2">
-          {props.row.registration_status === "WAITLIST" && (
-            <Button
-              size="sm"
-              onClick={() => handleApprove(props.row.id)}
-              disabled={!!approving}
-              className="bg-green-600 text-white hover:bg-green-700 h-7 text-xs"
-            >
-              {approving === props.row.id ? (
-                <Loader2 className="h-3 w-3 animate-spin" />
-              ) : (
-                "Approve"
-              )}
-            </Button>
-          )}
-          {props.row.registration_status === "WAITLIST" && (
-            <Button
-              size="sm"
-              onClick={() => handleReject(props.row.id)}
-              disabled={!!rejecting}
-              className="bg-red-600 text-white hover:bg-red-700 h-7 text-xs"
-            >
-              {rejecting === props.row.id ? (
-                <Loader2 className="h-3 w-3 animate-spin" />
-              ) : (
-                "Reject"
-              )}
-            </Button>
-          )}
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => {
-              setSelectedPlayer(props.row);
-              setDetailsDialogOpen(true);
-            }}
-            className="border-blue-300 text-blue-700 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-400 dark:hover:bg-blue-950/30 h-7 text-xs"
-          >
-            <Eye className="mr-1 h-3 w-3" />
-            Details
-          </Button>
-        </div>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => {
+            setSelectedPlayer(props.row);
+            setDetailsDialogOpen(true);
+          }}
+          className="border-blue-300 text-blue-700 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-400 dark:hover:bg-blue-950/30 h-7 text-xs w-full"
+        >
+          <Eye className="mr-1 h-3 w-3" />
+          Manage
+        </Button>
       ),
     },
   ];
@@ -1041,6 +1011,51 @@ export default function AdminDashboard() {
                   </div>
                 )}
               </div>
+
+              {/* Actions Section */}
+              {selectedPlayer.registration_status === "WAITLIST" && (
+                <div className="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/50">
+                  <h3 className="text-lg font-semibold mb-4 text-slate-900 dark:text-white">
+                    Actions
+                  </h3>
+                  <div className="flex gap-3">
+                    <Button
+                      onClick={() => handleApprove(selectedPlayer.id)}
+                      disabled={!!approving || !!rejecting}
+                      className="bg-green-600 text-white hover:bg-green-700 flex-1"
+                    >
+                      {approving === selectedPlayer.id ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Approving...
+                        </>
+                      ) : (
+                        <>
+                          <Check className="mr-2 h-4 w-4" />
+                          Approve Registration
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      onClick={() => handleReject(selectedPlayer.id)}
+                      disabled={!!approving || !!rejecting}
+                      className="bg-red-600 text-white hover:bg-red-700 flex-1"
+                    >
+                      {rejecting === selectedPlayer.id ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Rejecting...
+                        </>
+                      ) : (
+                        <>
+                          <X className="mr-2 h-4 w-4" />
+                          Reject Application
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </DialogContent>
