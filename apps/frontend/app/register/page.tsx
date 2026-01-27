@@ -236,10 +236,10 @@ function RegisterContent({ config }: { config: PublicConfig | null }) {
         <div className="rounded-lg border border-amber-200 bg-amber-50 p-6 dark:border-amber-900/40 dark:bg-amber-950/20">
           <div className="mb-4 text-center">
             <h3 className="text-lg font-semibold text-amber-900 dark:text-amber-100">
-              Already Registered?
+              Check Waitlist Results
             </h3>
             <p className="mt-1 text-sm text-amber-700 dark:text-amber-300">
-              Complete your payment to finalize your registration
+              Check your waitlist status or complete your payment
             </p>
           </div>
 
@@ -249,7 +249,7 @@ function RegisterContent({ config }: { config: PublicConfig | null }) {
                 htmlFor="resume-email"
                 className="block text-sm font-medium text-amber-900 dark:text-amber-200 mb-1"
               >
-                Enter your registered email
+                Enter your registered email to check status
               </label>
               <input
                 id="resume-email"
@@ -279,7 +279,7 @@ function RegisterContent({ config }: { config: PublicConfig | null }) {
                   <span>Checking...</span>
                 </>
               ) : (
-                <span>Continue to Payment</span>
+                <span>Check Status</span>
               )}
             </button>
           </form>
