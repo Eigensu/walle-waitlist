@@ -97,14 +97,9 @@ async def send_success_email(
                         <p><strong>Status:</strong> <span style="color: #10b981;">CONFIRMED</span></p>
                     </div>
                     
-                    <h3>What's Next?</h3>
-                    <ul>
-                        <li>Your jersey will be prepared as per your specifications</li>
-                        <li>You will receive further updates about team selection</li>
-                        <li>Keep an eye on your email for match schedules</li>
-                    </ul>
-                    
-                    <p>Please save this email for your records. Your Player ID (<strong>{player_id}</strong>) will be required for future reference.</p>
+                    <div style="text-align: center; margin: 30px 0;">
+                        <p style="font-size: 16px;">Thank you! We look forward to your participation.</p>
+                    </div>
                     
                     <p>If you have any questions, feel free to reach out to our support team.</p>
                     

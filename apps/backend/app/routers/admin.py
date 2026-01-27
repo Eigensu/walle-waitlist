@@ -97,6 +97,9 @@ async def get_all_players(
     
     # Get total count
     total = await Player.find_all().count()
+
+    # Get total paid count (based on registration_status)
+    total_paid = await Player.find(Player.registration_status == "PAID").count()
     
     # Fetch players with pagination
     players = await Player.find_all().skip(skip).limit(limit).sort("-created_at").to_list()
@@ -136,7 +139,13 @@ async def get_all_players(
             )
         )
     
-    return {"players": result, "total": total, "page": page, "limit": limit}
+    return {
+        "players": result,
+        "total": total,
+        "total_paid": total_paid,
+        "page": page,
+        "limit": limit
+    }
 
 
 @router.get("/players/csv")

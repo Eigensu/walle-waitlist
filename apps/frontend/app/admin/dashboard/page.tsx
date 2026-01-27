@@ -69,6 +69,7 @@ export default function AdminDashboard() {
   const [page, setPage] = useState(1);
   const [limit] = useState(50);
   const [total, setTotal] = useState(0);
+  const [totalPaid, setTotalPaid] = useState(0);
 
   useEffect(() => {
     const fetchPlayers = async () => {
@@ -98,6 +99,7 @@ export default function AdminDashboard() {
         const data = await response.json();
         setPlayers(data.players);
         setTotal(data.total);
+        setTotalPaid(data.total_paid);
       } catch (err) {
         setError(
           err instanceof Error ? err.message : "Failed to fetch players",
@@ -421,7 +423,7 @@ export default function AdminDashboard() {
             </CardHeader>
             <CardContent>
               <p className="text-4xl font-bold text-blue-600 dark:text-blue-400">
-                {filteredPlayers.length}
+                {total}
               </p>
             </CardContent>
           </Card>
@@ -432,10 +434,7 @@ export default function AdminDashboard() {
             </CardHeader>
             <CardContent>
               <p className="text-4xl font-bold text-green-600 dark:text-green-400">
-                {
-                  filteredPlayers.filter((p) => p.payment_status === "CAPTURED")
-                    .length
-                }
+                {totalPaid}
               </p>
             </CardContent>
           </Card>
