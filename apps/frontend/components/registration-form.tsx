@@ -80,6 +80,9 @@ export function RegistrationForm({
   const [statusMessage, setStatusMessage] = useState<StatusMessage>(null);
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>("idle");
   const [submitting, setSubmitting] = useState(false);
+  const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>("idle");
+  const [registrationStatus, setRegistrationStatus] = useState<string>("PAID");
+  const [submitting, setSubmitting] = useState(false);
   const [loadingPlayerData, setLoadingPlayerData] = useState(false);
 
   // Handle resume payment - load player data and jump to payment step
@@ -241,8 +244,16 @@ export function RegistrationForm({
         kind: "success",
         text: response.message || "Details saved",
       });
-      // Advance to payment step after successful submission
-      setStepIndex((prev) => prev + 1);
+
+      if (response.status === "WAITLIST") {
+        setRegistrationStatus("WAITLIST");
+        // Skip payment step and go to confirmation
+        setStepIndex(steps.length - 1);
+      } else {
+        setRegistrationStatus("PAID");
+        // Advance to payment step
+        setStepIndex((prev) => prev + 1);
+      }
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Failed to submit details";
@@ -473,7 +484,9 @@ export function RegistrationForm({
             />
           )}
 
-          {currentStepId === "done" && <ConfirmationStep playerId={playerId} />}
+          {currentStepId === "done" && (
+            <ConfirmationStep playerId={playerId} status={registrationStatus} />
+          )}
 
           {statusMessage ? (
             <div

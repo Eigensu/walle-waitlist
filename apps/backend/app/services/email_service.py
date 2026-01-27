@@ -130,3 +130,90 @@ async def send_success_email(
         import traceback
         traceback.print_exc()
         return False
+
+async def send_approval_email(
+    to_email: str,
+    name: str,
+    player_id: str,
+) -> bool:
+    """
+    Send approval email with payment link.
+    
+    Args:
+        to_email: Recipient email address
+        name: Player's full name
+        player_id: Unique player registration ID
+    
+    Returns:
+        bool: True if email sent successfully, False otherwise
+    """
+    try:
+        resume_link = f"https://jypl.in/resume-payment?email={to_email}"
+        
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+                .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+                .header {{ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }}
+                .content {{ background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }}
+                .success-badge {{ background: #10b981; color: white; padding: 10px 20px; border-radius: 5px; display: inline-block; margin: 20px 0; }}
+                .info-box {{ background: white; padding: 20px; border-left: 4px solid #667eea; margin: 20px 0; }}
+                .footer {{ text-align: center; margin-top: 30px; font-size: 12px; color: #666; }}
+                .button {{ background: #667eea; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block; margin: 20px 0; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>🎉 Application Approved!</h1>
+                </div>
+                <div class="content">
+                    <p>Dear <strong>{{name}}</strong>,</p>
+                    
+                    <p>We are pleased to inform you that your application for <strong>JYPL Season 8</strong> has been approved from the waitlist.</p>
+                    
+                    <div class="info-box">
+                        <h3>Next Steps</h3>
+                        <p>You can now proceed with the payment to confirm your spot.</p>
+                        <p><strong>Player ID:</strong> {{player_id}}</p>
+                        <p><strong>Status:</strong> <span style="color: #10b981;">APPROVED</span></p>
+                    </div>
+                    
+                    <div style="text-align: center; margin: 30px 0;">
+                        <a href="{{resume_link}}" class="button">Complete Payment Now</a>
+                        <p style="font-size: 12px; margin-top: 10px;">Or visit the website and use the "Resume Payment" option with your email.</p>
+                    </div>
+                    
+                    <div style="text-align: center; margin: 30px 0;">
+                        <p style="font-size: 16px;">Please complete the payment to secure your registration.</p>
+                    </div>
+                    
+                    <div class="footer">
+                        <p><strong>JYPL Season 8 | Jewellery Youth Premier League</strong></p>
+                        <p>This is an automated email. Please do not reply to this message.</p>
+                    </div>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        
+        message = MessageSchema(
+            subject="🎉 JYPL Application Approved - Complete Payment Now",
+            recipients=[to_email],
+            body=html_content.format(name=name, player_id=player_id, resume_link=resume_link),
+            subtype=MessageType.html
+        )
+        
+        await fastmail.send_message(message)
+        print(f"✅ Approval email sent to {to_email} for player {player_id}")
+        return True
+        
+    except Exception as e:
+        print(f"❌ Failed to send approval email to {to_email}: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return False

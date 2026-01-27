@@ -1,6 +1,7 @@
 export type RegisterResponse = {
   player_id: string;
   message: string;
+  status?: string;
 };
 
 export type CreateOrderResponse = {
@@ -145,4 +146,16 @@ export async function adminUpdateConfig(
     body: JSON.stringify({ registration_open }),
   });
   return handleJson<AdminConfig>(res);
+}
+
+export async function approvePlayer(
+  playerId: string,
+  username: string,
+  pass: string,
+): Promise<{ message: string }> {
+  const url = `/api/admin/approve/${playerId}?username=${encodeURIComponent(username)}&password=${encodeURIComponent(pass)}`;
+  const res = await fetch(url, {
+    method: "POST",
+  });
+  return handleJson<{ message: string }>(res);
 }

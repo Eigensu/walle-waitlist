@@ -18,6 +18,7 @@ CARD_MIMES = {"image/jpeg", "image/png", "image/heic", "image/heif", "applicatio
 class RegisterResponse(BaseModel):
     player_id: str
     message: str = "Details Saved"
+    status: str | None = None
 
 
 class ResumePaymentResponse(BaseModel):
@@ -135,7 +136,7 @@ async def register_player(
         # JYPL Season 8 Details
         played_jypl_s7=played_jypl_s7,
         jypl_s7_team=jypl_s7_team,
-        registration_status=RegistrationStatus.PENDING_PAYMENT,
+        registration_status=RegistrationStatus.WAITLIST,
         created_at=datetime.now(timezone.utc),
     )
 
@@ -144,7 +145,7 @@ async def register_player(
     except DuplicateKeyError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Duplicate email or phone") from exc
 
-    return RegisterResponse(player_id=str(player.id), message="Details Saved")
+    return RegisterResponse(player_id=str(player.id), message="Added to Waitlist", status=RegistrationStatus.WAITLIST.value)
 
 
 @router.put("/player/{player_id}", response_model=RegisterResponse)
@@ -245,6 +246,12 @@ async def resume_payment(request: ResumePaymentRequest):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Payment already completed for this email"
+        )
+    
+    if player.registration_status == RegistrationStatus.WAITLIST:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Your registration is currently in waitlist. You will be notified once approved."
         )
     
     return ResumePaymentResponse(

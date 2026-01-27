@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/dialog";
 import { DataGrid, type Column, type SortColumn } from "react-data-grid";
 import "react-data-grid/lib/styles.css";
-import { adminGetConfig, adminUpdateConfig } from "@/lib/api";
+import { adminGetConfig, adminUpdateConfig, approvePlayer } from "@/lib/api";
 
 interface Player {
   id: string;
@@ -64,6 +64,7 @@ export default function AdminDashboard() {
   const [paymentError, setPaymentError] = useState("");
   const [regOpen, setRegOpen] = useState<boolean | null>(null);
   const [regUpdating, setRegUpdating] = useState(false);
+  const [approving, setApproving] = useState<string | null>(null);
 
   // Pagination State
   const [page, setPage] = useState(1);
@@ -149,6 +150,30 @@ export default function AdminDashboard() {
       setError(err instanceof Error ? err.message : "Failed to update config");
     } finally {
       setRegUpdating(false);
+    }
+  };
+
+  const handleApprove = async (playerId: string) => {
+    setApproving(playerId);
+    try {
+      const credentials = localStorage.getItem("admin_credentials");
+      if (!credentials) {
+        router.push("/admin");
+        return;
+      }
+      const [username, password] = atob(credentials).split(":");
+      await approvePlayer(playerId, username, password);
+
+      // Update local state
+      setPlayers(
+        players.map((p) =>
+          p.id === playerId ? { ...p, registration_status: "APPROVED" } : p,
+        ),
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to approve player");
+    } finally {
+      setApproving(null);
     }
   };
 
@@ -265,18 +290,34 @@ export default function AdminDashboard() {
       width: 100,
       sortable: false,
       renderCell: (props: { row: Player }) => (
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={() => {
-            setSelectedPlayer(props.row);
-            setDetailsDialogOpen(true);
-          }}
-          className="border-blue-300 text-blue-700 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-400 dark:hover:bg-blue-950/30"
-        >
-          <Eye className="mr-1 h-3 w-3" />
-          Details
-        </Button>
+        <div className="flex gap-2">
+          {props.row.registration_status === "WAITLIST" && (
+            <Button
+              size="sm"
+              onClick={() => handleApprove(props.row.id)}
+              disabled={!!approving}
+              className="bg-green-600 text-white hover:bg-green-700 h-7 text-xs"
+            >
+              {approving === props.row.id ? (
+                <Loader2 className="h-3 w-3 animate-spin" />
+              ) : (
+                "Approve"
+              )}
+            </Button>
+          )}
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              setSelectedPlayer(props.row);
+              setDetailsDialogOpen(true);
+            }}
+            className="border-blue-300 text-blue-700 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-400 dark:hover:bg-blue-950/30 h-7 text-xs"
+          >
+            <Eye className="mr-1 h-3 w-3" />
+            Details
+          </Button>
+        </div>
       ),
     },
   ];

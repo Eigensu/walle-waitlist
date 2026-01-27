@@ -7,6 +7,8 @@ from app.models.payment import Payment, PaymentStatus
 from app.models.config import AppConfig
 from beanie.operators import In
 
+from app.services.email_service import send_approval_email
+
 router = APIRouter(prefix="/api/admin", tags=["admin"])
 
 
@@ -287,3 +289,45 @@ async def update_config(
         cfg.registration_open = payload.registration_open
         await cfg.save()
     return ConfigResponse(registration_open=cfg.registration_open)
+
+
+@router.post("/approve/{player_id}")
+async def approve_player(
+    player_id: str,
+    username: str,
+    password: str,
+    settings: Settings = Depends(get_settings),
+):
+    """Approve a waitlisted player and send email."""
+    if not verify_admin_credentials(username, password, settings):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid credentials"
+        )
+    
+    try:
+        from beanie import PydanticObjectId
+        player = await Player.get(PydanticObjectId(player_id))
+    except Exception:
+        raise HTTPException(status_code=404, detail="Player not found")
+        
+    if not player:
+        raise HTTPException(status_code=404, detail="Player not found")
+        
+    if player.registration_status != RegistrationStatus.WAITLIST:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Player is not in waitlist (Status: {player.registration_status})"
+        )
+        
+    player.registration_status = RegistrationStatus.APPROVED
+    await player.save()
+    
+    # Send email
+    await send_approval_email(
+        to_email=player.email,
+        name=f"{player.first_name} {player.last_name}",
+        player_id=str(player.id)
+    )
+    
+    return {"message": "Player approved and email sent"}
