@@ -28,6 +28,7 @@ class Payment(Document):
     amount: int
     currency: str = "INR"
     created_at: datetime = Field(default_factory=ist_now)
+    confirmation_email_sent: bool = False
 
     model_config = ConfigDict(str_strip_whitespace=True)
 

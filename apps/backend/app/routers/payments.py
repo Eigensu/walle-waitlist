@@ -83,6 +83,7 @@ async def create_order(
 @router.post("/verify", response_model=VerifyPaymentResponse)
 async def verify_payment(
     payload: VerifyPaymentRequest,
+    background_tasks: BackgroundTasks,
     settings: Settings = Depends(get_settings),
     razorpay: RazorpayService = Depends(get_razorpay),
 ):
@@ -114,6 +115,22 @@ async def verify_payment(
     if player:
         player.registration_status = RegistrationStatus.PAID
         await player.save()
+
+        # Send confirmation email if not already sent
+        if not payment.confirmation_email_sent:
+            full_name = f"{player.first_name} {player.last_name}"
+            amount_inr = payment.amount // 100  # Convert paise to rupees
+            
+            background_tasks.add_task(
+                send_success_email,
+                to_email=player.email,
+                name=full_name,
+                player_id=str(player.id),
+                amount=amount_inr
+            )
+            
+            payment.confirmation_email_sent = True
+            await payment.save()
 
     return VerifyPaymentResponse(status="CAPTURED", message="Payment verified")
 
@@ -185,16 +202,20 @@ async def razorpay_webhook(
             await player.save()
             
             # Send confirmation email
-            full_name = f"{player.first_name} {player.last_name}"
-            amount_inr = payment.amount // 100  # Convert paise to rupees
-            
-            # Send email asynchronously (non-blocking)
-            background_tasks.add_task(
-                send_success_email,
-                to_email=player.email,
-                name=full_name,
-                player_id=str(player.id),
-                amount=amount_inr
-            )
+            if not payment.confirmation_email_sent:
+                full_name = f"{player.first_name} {player.last_name}"
+                amount_inr = payment.amount // 100  # Convert paise to rupees
+                
+                # Send email asynchronously (non-blocking)
+                background_tasks.add_task(
+                    send_success_email,
+                    to_email=player.email,
+                    name=full_name,
+                    player_id=str(player.id),
+                    amount=amount_inr
+                )
+                
+                payment.confirmation_email_sent = True
+                await payment.save()
 
     return {"status": "ok"}
