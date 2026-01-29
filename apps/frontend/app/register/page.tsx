@@ -25,7 +25,7 @@ export default function RegisterPage() {
           registration_open: true,
           registration_cap_reached: false,
           current_registrations: 0,
-          registration_cap: 174,
+          registration_cap: 200,
         });
       }
     };
