@@ -136,7 +136,12 @@ export async function getPlayerDetails(
 }
 
 export async function getPublicConfig(): Promise<PublicConfig> {
-  const res = await fetch("/api/config");
+  const res = await fetch("/api/config", {
+    cache: "no-store",
+    headers: {
+      "Cache-Control": "no-cache",
+    },
+  });
   return handleJson<PublicConfig>(res);
 }
 
