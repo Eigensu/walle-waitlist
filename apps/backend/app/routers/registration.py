@@ -103,7 +103,7 @@ async def register_player(
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Phone already registered")
 
     # Check registration cap
-    registration_cap = cfg.registration_cap if cfg else 174
+    registration_cap = cfg.registration_cap if cfg else 200
     current_count = await Player.count()
     if current_count >= registration_cap:
         raise HTTPException(
@@ -317,7 +317,7 @@ class PublicConfigResponse(BaseModel):
 async def get_public_config():
     """Public endpoint: expose registration open/closed status for frontend."""
     cfg = await AppConfig.find_one({})
-    registration_cap = cfg.registration_cap if cfg else 174
+    registration_cap = cfg.registration_cap if cfg else 200
     current_count = await Player.count()
     
     return PublicConfigResponse(
