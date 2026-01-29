@@ -75,7 +75,7 @@ async def send_email(subject: str, to_email: str, html_body: str) -> bool:
     print(f"❌ RESEND API FAILED.")
     print(f"👇 ================= MANUAL ACTION REQUIRED ================= 👇")
     print(f"Please send this Payment Link manually to the user:")
-    print(f"🔗 https://jypl.in/resume-payment?email={to_email}")
+    print(f"🔗 https://jypl-waitlist.wallearena.com/resume-payment?email={to_email}")
     print(f"👆 ========================================================== 👆")
     return True
 
@@ -129,7 +129,7 @@ async def send_success_email(
                 </div>
                 
                 <div class="footer">
-                    <p><strong>JYPL Season 8 | Jewellery Youth Premier League</strong></p>
+                    <p><strong>JYPL Season 9 | Jewellery Youth Premier League</strong></p>
                     <p>This is an automated email. Please do not reply to this message.</p>
                 </div>
             </div>
@@ -153,7 +153,7 @@ async def send_approval_email(
     """
     Send approval email with payment link.
     """
-    resume_link = f"https://jypl.in/resume-payment?email={to_email}"
+    resume_link = f"https://jypl-waitlist.wallearena.com/resume-payment?email={to_email}"
     
     html_content = f"""
     <!DOCTYPE html>
@@ -192,7 +192,7 @@ async def send_approval_email(
                 </div>
                 
                 <div class="footer">
-                    <p><strong>JYPL Season 8 | Jewellery Youth Premier League</strong></p>
+                    <p><strong>JYPL Season 9 | Jewellery Youth Premier League</strong></p>
                     <p>This is an automated email. Please do not reply to this message.</p>
                 </div>
             </div>
