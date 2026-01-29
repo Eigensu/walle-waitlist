@@ -75,7 +75,7 @@ async def send_email(subject: str, to_email: str, html_body: str) -> bool:
     print(f"❌ RESEND API FAILED.")
     print(f"👇 ================= MANUAL ACTION REQUIRED ================= 👇")
     print(f"Please send this Payment Link manually to the user:")
-    print(f"🔗 https://jypl-waitlist.wallearena.com/resume-payment?email={to_email}")
+    print(f"🔗 https://jypl-waitlist.wallearena.com")
     print(f"👆 ========================================================== 👆")
     return True
 
@@ -153,7 +153,7 @@ async def send_approval_email(
     """
     Send approval email with payment link.
     """
-    resume_link = f"https://jypl-waitlist.wallearena.com/resume-payment?email={to_email}"
+    resume_link = f"https://jypl-waitlist.wallearena.com"
     
     html_content = f"""
     <!DOCTYPE html>
